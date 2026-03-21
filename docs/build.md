@@ -7,10 +7,44 @@
 - **NetCDF libraries**: netCDF-C and netCDF-Fortran with HDF5 support
 - **Make**: GNU Make
 
-On macOS without admin access, compilers can be installed via conda:
-```
+## macOS (Apple Silicon) Setup
+
+On macOS without admin/Homebrew access, compilers and libraries can
+be installed entirely in user space via conda-forge:
+
+```bash
+# Install compilers
 conda install -c conda-forge gfortran_osx-arm64 gcc_osx-arm64
+
+# Install netCDF and HDF5
+conda install -c conda-forge netcdf-fortran hdf5 libnetcdf
 ```
+
+The conda compilers use target-prefixed names
+(e.g. `arm64-apple-darwin20.0.0-gfortran`). Create short symlinks
+in `~/bin` for convenience:
+
+```bash
+mkdir -p ~/bin
+ln -sf ~/miniconda3/bin/arm64-apple-darwin20.0.0-gfortran ~/bin/gfortran
+ln -sf ~/miniconda3/bin/arm64-apple-darwin20.0.0-gcc ~/bin/gcc
+```
+
+Ensure `~/bin` is on your `PATH`.
+
+### macOS-specific Makefile settings
+
+The Makefile shipped in `build/` is configured for macOS with
+conda-forge toolchains. Key differences from a Linux build:
+
+- **No `--static` linker flag** — macOS does not support fully
+  static linking. Use `usrLDFLAGS = -g` instead.
+- **GCC 15 compatibility flags** — Modern gfortran requires
+  `-fallow-invalid-boz` (for octal BOZ literals in legacy code) and
+  `-fallow-argument-mismatch` (for legacy Fortran calling conventions).
+  These are included in `usrFFLAGS`.
+- **`CONDA_PREFIX`** — The Makefile uses this variable to locate
+  headers and libraries under `~/miniconda3`.
 
 ## Building the Model
 
@@ -19,15 +53,16 @@ conda install -c conda-forge gfortran_osx-arm64 gcc_osx-arm64
 Edit the top section of `build/Makefile` to set paths for your system:
 
 ```makefile
-# Compiler paths
-FC = gfortran
-CC = gcc
+# Conda environment (adjust if not using default miniconda3 location)
+CONDA_PREFIX = $(HOME)/miniconda3
 
-# NetCDF/HDF5 include path
-usrCPP_INCS = -I/path/to/netcdf/include
+# Compiler paths (use absolute paths or ensure ~/bin is on PATH)
+FC = /Users/yourusername/bin/gfortran
+CC = /Users/yourusername/bin/gcc
 
-# NetCDF/HDF5 library path and link flags
-nchdflib = -L/path/to/netcdf/lib -lnetcdff -lnetcdf \
+# NetCDF/HDF5 include and library paths
+usrCPP_INCS = -I$(CONDA_PREFIX)/include
+nchdflib = -L$(CONDA_PREFIX)/lib -lnetcdff -lnetcdf \
            -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lsz -lz
 ```
 
@@ -36,14 +71,14 @@ Other Makefile variables you may need to adjust:
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `precision_mode` | `r8` | Double precision |
-| `usrFFLAGS` | `-O3 -ffixed-line-length-132` | Fortran compile flags |
-| `usrLDFLAGS` | `--static -g` | Linker flags |
+| `usrFFLAGS` | `-O3 -ffixed-line-length-132 -fallow-invalid-boz -fallow-argument-mismatch` | Fortran compile flags |
+| `usrLDFLAGS` | `-g` | Linker flags (no `--static` on macOS) |
 | `usrCPP_DEFS_AER` | `-DDST -DCAER -DSCYC -DWETDEP -DDRYDEP -DASSIM` | Aerosol module selection |
 
 ### 2. Configure `build/Filepath`
 
 `Filepath` lists the source directories to search, one per line.
-Update the paths to match your installation:
+Use relative paths from the `build/` directory:
 
 ```
 ../readers/ncep
