@@ -5,9 +5,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "mss.h"
 #include "str_util.h"
+#include "utim.h"
 
 #define MAX_BUFF 200
 #define MAX_COMMAND 500

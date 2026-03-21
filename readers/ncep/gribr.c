@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <float.h>
+#include "utim.h"
 
 #ifdef VMD
 #include <toolsa/MEMM.h>

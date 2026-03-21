@@ -1,7 +1,8 @@
 makdep = ./makdep_usrbinperl
 precision_mode = r8
-usrCPP_INCS = -I/SPG_ops/utils/CERES/TOOLKIT/scf_toolkit5.2.18v1-x86_64/include
-nchdflib = -L/SPG_ops/utils/CERES/TOOLKIT/scf_toolkit5.2.18v1-x86_64/lib -lnetcdff -lnetcdf -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lsz -lz
+CONDA_PREFIX = $(HOME)/miniconda3
+usrCPP_INCS = -I$(CONDA_PREFIX)/include
+nchdflib = -L$(CONDA_PREFIX)/lib -lnetcdff -lnetcdf -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lsz -lz
 usrCPP_DEFS_AER = -DDST -DCAER -DSCYC -DWETDEP -DDRYDEP -DASSIM
 r8FLAG =
 usrCPP_DEFS_PRC = -DRPREC=12 -DREALSIZE=8
@@ -12,10 +13,10 @@ endif
 ifdef usrCPP_DEFS_TRAC
   usrCPP_DEFS := $(usrCPP_DEFS) $(usrCPP_DEFS_TRAC)
 endif
-usrFFLAGS  = -O3 -ffixed-line-length-132
+usrFFLAGS  = -O3 -ffixed-line-length-132 -fallow-invalid-boz -fallow-argument-mismatch
 specFFLAGS = $(usrFFLAGS)
 specFFLAGS2 = $(usrFFLAGS)
-usrLDFLAGS = --static -g
+usrLDFLAGS = -g
 
 ###############################################################################
 # User shouldn't need to modify code below this point.
@@ -48,13 +49,13 @@ ifdef usrCPP_DEFS
 endif	
 CPP_INCS := $(cpp_path) $(usrCPP_INCS)
 
-FC = /SCF2/CERES/tools/compilers/x86_64/gcc-4.5.3-ceres/bin/gfortran
+FC = /Users/Dfillmor/bin/gfortran
 ifeq ($(useF77),TRUE)
   FC = $(fc77)
 endif
 FFLAGS = $(usrFFLAGS)
 
-CC = /SCF2/CERES/tools/compilers/x86_64/gcc-4.5.3-ceres/bin/gcc
+CC = /Users/Dfillmor/bin/gcc
 CFLAGS = -DLINUX
 objflag = -c -o $@
 

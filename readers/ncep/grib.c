@@ -12,9 +12,6 @@
 
 #include <ctype.h>
 #include <math.h>
-#include <malloc.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -47,6 +44,9 @@ static int DebugM = 0;
 #else
 #define REAL double
 #endif
+
+extern void TINTERP(REAL*, REAL*, REAL*, REAL*, int*);
+extern void AREAAVG(int*, REAL*, int*, REAL*, int*, REAL*, int*);
 
 static unsigned long Reader_cl = 0, Regrid_cl = 0, Grib_cl = 0, Interp_cl = 0;
 static UTIMdiff_t *Total_ud, *Reader_ud, *Regrid_ud, *Grib_ud, *Interp_ud;

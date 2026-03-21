@@ -17,4 +17,6 @@ extern long UTIMjulian_date(int day, int month, int year);
 
 extern void UTIMcalendar_date(long jdate,long *day, long *month, long *year);
 
+extern unsigned long UTIMdiff( UTIMdiff_t *tdiff);
+
 #endif

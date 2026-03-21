@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <netcdf.h>
 
 #ifdef VMD
@@ -36,6 +37,9 @@
 #else
 #define REAL double
 #endif
+
+extern void TINTERP(int*, REAL*, REAL*, REAL*, int*, REAL*, int*);
+extern void AREAAVG(int*, REAL*, int*, REAL*, int*, REAL*, int*);
 
 static char *scat( char *s1, char *s2)
     {
