@@ -1,0 +1,46 @@
+MATCH data readers
+doc last changed: 9/18/97
+code changes:
+  11/19/97: fix "-DREALSIZE=8"
+
+Overview
+-------
+MATCH has defined a general interface to get dynamics data, so that it
+can be driven with different datasets. See doc/dynamics_input_data
+for details.
+
+The "standard" reader is for CCM2/3 output, and comes standard with the
+match release.  The interface code is implemented in dyninp.F.
+
+Other sets of routines implement alternative readers. Currently, the ncep 
+reader can read NCEP/NCAR reanalysis output.
+
+Modifying the Match release
+---------------------------
+In general, to use these readers, you modify the match Makefile, removing
+dyninp.F, and adding the new set of code.  Since we expect for match to continue
+to evolve, the general idea is to be able to copy the match release to the top
+level directory, untar it, modify the Makefile, and remake.  Therefore, we keep 
+the reader source in seperate directory, but build in the match directory. (Another 
+idea is to keep the match source in a different directory, and have "build"
+directories for different target machines. Not yet implemented).
+
+Some specific notes on needed modifications:
+
+On machines with access to the NCAR MSS (via the msread command)
+add -DHAS_MSREAD to compile line for mss.c
+
+The Readers
+-----------
+Each reader subdirectory has an example Makefile that you need to manually merge with 
+the standard match Makefile.  
+
+The following routines are common utilities, and are kept in match/readers:
+    mss.[ch]         mass store files management
+    str_util.[ch]    string utilities
+    utim.[ch]        time conversion utilities
+    rgi.[ch]	     Area Average regridding
+    rgip.F	     fortran routines for regridding
+
+The reader specific routines are kept in readers/<readername>
+

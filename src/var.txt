@@ -1,0 +1,139 @@
+aphys.F:      use histout, only: outfld
+aphys.F:      call outfld('ZPRECC  ', precc,   plond, lat, obuf )
+aphys.F:      call outfld('ZCMFDQR ', cmfdqr,  plond, lat, obuf )
+aphys.F:      call outfld('ZCMFMC  ', cmfmc,   plond, lat, obuf )
+aphys.F:      call outfld('ZMU     ', zmu,     plond, lat, obuf )
+aphys.F:      call outfld('ZMD     ', zmd,     plond, lat, obuf )
+aphys.F:      call outfld('ZEU     ', zeu,     plond, lat, obuf )
+aphys.F:      call outfld('ZDU     ', zdu,     plond, lat, obuf )
+aphys.F:      call outfld('CONBETA ', hkbeta,  plond, lat, obuf )
+aphys.F:      call outfld('CONETA  ', hketa,   plond, lat, obuf )
+aphys.F:      call outfld('PRECC   ', precc,   plond, lat, obuf )
+aphys.F:      call outfld('CMFDQR  ', cmfdqr,  plond, lat, obuf )
+aphys.F:      call outfld('CMFMC   ', cmfmc,   plond, lat, obuf )
+aphys.F:      call outfld('CONICW  ', conicw,  plond, lat, obuf )
+cloud.F:      use histout, only: outfld
+cloud.F:      call outfld( 'CLOUD   ', cldt,   plond, lat, obuf )
+cloud.F:      call outfld( 'CONCLD  ', cldc,   plond, lat, obuf )
+cloud.F:      call outfld( 'CLDTOT  ', cltot,  plond, lat, obuf )
+cloud.F:      call outfld( 'CLDLOW  ', cllow,  plond, lat, obuf )
+cloud.F:      call outfld( 'CLDMED  ', clmed,  plond, lat, obuf )
+cloud.F:      call outfld( 'CLDHGH  ', clhgh,  plond, lat, obuf )
+cloud.F:      call outfld( 'CME     ', cme,    plond, lat, obuf )
+cloud.F:      call outfld( 'PRAIN   ', prain,  plond, lat, obuf )
+cloud.F:      call outfld( 'EVAPR   ', evapr,  plond, lat, obuf )
+cloud.F:      call outfld( 'PRECL   ', precl,  plond, lat, obuf )
+drydepdr.F:      use histout, only: outfld
+drydepdr.F:         call outfld( trim(tracnam(mm))//'DRY', flx(1,mm), plond
+drydepdr.F:         call outfld( trim(tracnam(mm))//'DRY', flx(1,mm), plond
+drydepdr.F:         call outfld( trim(tracnam(mm))//'DRY', flx(1,mm), plond
+drydepdr.F:            call outfld( trim(tracnam(mm))//'DRY', flx(1,mm), plond
+histout.F:     $, outfld    ! update history for fields written to output file
+histout.F:     $, outinst(mxoutflds)*8  ! instantaneous output fields names
+histout.F:     $, outtimav(mxoutflds)*8 ! time averaged output fields names
+histout.F:         if (ndiagfld+2*pcnst.gt.mxoutflds) then
+histout.F:     $           ,'exceeds mxoutflds ',mxoutflds,' defined in pmgrid.h'
+histout.F:#include <dstnm.h> /* Nomenclature for outfld() */
+histout.F:c     NB: pmgrid.h:mxoutflds must also be large enough
+histout.F:      write (6,'(a,i3,a,i3)') 'dst: mxoutflds = ',mxoutflds,', mxdiagflds = ',mxdiagflds
+histout.F:     $  outinst(mxoutflds)*8  ! instantaneous output fields
+histout.F:     $, outtimav(mxoutflds)*8 ! time averaged output fields
+histout.F:      do 10 i = 1, mxoutflds
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst, tracnam, ninstfld
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst, sflxnam, ninstfld
+histout.F:         call findfld( mxoutflds, outinst, i, pnats, natsnam, ninstfld
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst, tanam, ninstfld
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst, vdnam, ninstfld
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst, dcnam, ninstfld
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst+2, xflxnam
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst+2, yflxnam
+histout.F:         call findfld( mxoutflds, outinst, i, pcnst+2, zflxnam
+histout.F:         call findfld( mxoutflds, outinst, i, ndiagfld, diagnams
+histout.F:      do 30 i = 1, mxoutflds
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst, tracnam, ntimavfld
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst, sflxnam, ntimavfld
+histout.F:         call findfld( mxoutflds, outtimav, i, pnats, natsnam, ntimavfld
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst, tanam, ntimavfld
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst, vdnam, ntimavfld
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst, dcnam, ntimavfld
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst+2, xflxnam
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst+2, yflxnam
+histout.F:         call findfld( mxoutflds, outtimav, i, pcnst+2, zflxnam
+histout.F:         call findfld( mxoutflds, outtimav, i, ndiagfld, diagnams
+histout.F:      subroutine outfld( fname, field, idim, lat, obuf )
+histout.F:      end subroutine outfld
+main.F:     $  outinst(mxoutflds)  ! names of instantaneous output fields
+main.F:     $, outtimav(mxoutflds) ! names of time averaged output fields
+main.F:      do m = 1, mxoutflds
+physlic.F:      use histout, only: outfld, qhsti
+physlic.F:#include <dstnm.h> /* Nomenclature for outfld() */
+physlic.F:c     Diagnostic totals for outfld
+physlic.F:         call outfld( tanam(m), tend, plond, lat, obuf )
+physlic.F:         call outfld( 'TAQ', tend, plond, lat, obuf )
+physlic.F:         call outfld( 'TATHETA', tend, plond, lat, obuf )
+physlic.F:            call outfld( vdnam(m), tend, plond, lat, obuf )
+physlic.F:            call outfld( 'VDQ', tend, plond, lat, obuf )
+physlic.F:         call outfld( 'DCQ', tend, plond, lat, obuf )
+physlic.F:            call outfld( dcnam(pcnst), tend, plond, lat, obuf )
+physlic.F:         call outfld( 'PRECT',  prect, plond, lat, obuf )
+physlic.F:         call outfld( 'DQR',      dqr, plond, lat, obuf )
+physlic.F:            call outfld(flx_mss_pcp_sfc_nm(mm-dst_idx_srt+1), sdiag1, plond, lat, obuf)
+physlic.F:         call outfld('DSTSFPCP', sdiag2, plond, lat, obuf)
+physlic.F:         call outfld('DSTSSPCP', mdiag1, plond, lat, obuf)
+physlic.F:            call outfld( dcnam(m), tend, plond, lat, obuf )
+physlic.F:      call outfld('DSTQ    ',q_dst_ttl,plond,lat,obuf)
+physlic.F:      call outfld('DSTMPC  ',mpc_dst_ttl,plond,lat,obuf)
+physlic.F:         call outfld(mpc_dst_nm(m),mpc_dst(1,m),plond,lat,obuf)
+physlic.F:      call outfld('DSTODXC',odxc_dst_ttl,plond,lat,obuf)
+physlic.F:         call outfld(odxc_dst_nm(m),odxc_dst(1,m),plond,lat,obuf)
+physlic.F:      call outfld( 'PS',    ps,           plond, lat, obuf )
+physlic.F:      call outfld( 'U',     uv,           plond, lat, obuf )
+physlic.F:      call outfld( 'V', uv(1,1,2),        plond, lat, obuf )
+physlic.F:      call outfld( 'QIN',   sh1,          plond, lat, obuf )
+physlic.F:      call outfld( 'T',     t1,           plond, lat, obuf )
+physlic.F:      call outfld( 'Z',     zm,           plond, lat, obuf )
+physlic.F:      call outfld( 'ZI',    zi,           plond, lat, obuf )
+physlic.F:      call outfld( 'ORO',   oro,          plond, lat, obuf )
+physlic.F:      call outfld( 'PHIS', phis,          plond, lat, obuf )
+physlic.F:      call outfld( 'TS',   ts,            plond, lat, obuf )
+physlic.F:      call outfld( 'ETADOT', etadot(1,2), plon,  lat, obuf )
+physlic.F:      call outfld( 'ETDOTR', wr(1,2),     plon,  lat, obuf )
+physlic.F:      call outfld( 'MCA'   , mca(1,2),    plon,  lat, obuf )
+physlic.F:      call outfld( 'MCAR'  , mcar(1,2),   plon,  lat, obuf )
+physlic.F:      call outfld( 'OMEGA', omga,         plond, lat, obuf )
+physlic.F:      call outfld( 'TAUX',  taux,         plond, lat, obuf )
+physlic.F:      call outfld( 'TAUY',  tauy,         plond, lat, obuf )
+physlic.F:      call outfld( 'SHFLX', hflx,         plond, lat, obuf )
+physlic.F:      call outfld( 'QFLX', wvflx,         plond, lat, obuf )
+physlic.F:      call outfld( 'FSDS',  fsds,         plond, lat, obuf )
+physlic.F:      call outfld( 'FSUS',  fsus,         plond, lat, obuf )
+physlic.F:      call outfld( 'FLDS',  flds,         plond, lat, obuf )
+physlic.F:      call outfld( 'VWCSFC',vwcsfc,       plond, lat, obuf )
+physlic.F:      call outfld( 'SNOWH',snowh,         plond, lat, obuf )
+physlic.F:         call outfld( tracnam(m), as1(1,1,m), plond, lat, obuf )
+physlic.F:         call outfld( 'TCWV',      ci, plond, lat, obuf )
+physlic.F:         call outfld( 'Q',      shadv, plond, lat, obuf )
+physlic.F:         call outfld( 'XTHETA', ptadv, plond, lat, obuf )
+physlic.F:         call outfld( 'RELHUM',    rh, plond, lat, obuf )
+physlic.F:      call outfld('U10',         u10, plond, lat, obuf )
+physlic.F:      call outfld('SSLT',       sslt, plond, lat, obuf )
+physlic.F:!      call outfld('SSLTOD', tausslt, plond, lat, obuf )
+physlic.F:         call outfld( trim(tracnam(mm))//'OD', aerod(1,mm), plond
+physlic.F:            call outfld( trim(tracnam(mm))//'OD', aerod(1,mm), plond
+physlic.F:      call outfld('SSLTOD', tausslt, plond, lat, obuf )
+physlic.F:      call outfld('AEROD',totaerod, plond, lat, obuf )
+srcsnk.F:      use histout, only: outfld
+srcsnk.F:            call outfld( trim(tracnam(mm))//'SRC', srcsnk(1,1,mm), plond
+surface.F:      use histout, only: outfld
+surface.F:            call outfld( 'SO2VOLC', so2tend, plond, lat, obuf )
+surface.F:            call outfld( sflxnam(mm), sflx(1,mm), plond, lat, obuf )
+vdiff_mod.F:      use histout, only: outfld
+vdiff_mod.F:         call outfld( 'KVH', kvh(1,2), plond, lat, obuf )
+vdiff_mod.F:         call outfld( 'CGS', cgs(1,2), plond, lat, obuf )
+vdiff_mod.F:         call outfld( 'PBLH', pblh,    plond, lat, obuf )
+vdiff_mod.F:         call outfld( 'TPERT', tpert,  plond, lat, obuf )
+vdiff_mod.F:         call outfld( 'QPERT', qpert,  plond, lat, obuf )
+wetdepdr.F:      use histout, only: outfld
+wetdepdr.F:c      call outfld( '?WET', scavt, plond, lat, obuf )
+wetdepdr.F:c      call outfld( '?WET', scavt, plond, lat, obuf )
+wetdepdr.F:            call outfld( trim(tracnam(mm))//'WET', scavt, plond

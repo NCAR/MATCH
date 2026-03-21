@@ -1,0 +1,38 @@
+#!/SPG_ops/utils/CERES/TOOLKIT/scf_toolkit5.2.18v1-x86_64/bin/perl -w
+
+# Write file containing a list of filepaths of all the netCDF files
+# in a specified directory.
+# 
+# SYNOPSIS
+#      list_nc_files directory_name out_file
+
+($ProgName = $0) =~ s!.*/!!;            # name of program
+
+$dir = shift()                    or usage();
+$out = shift()                    or usage();
+
+@ARGV == 0                        or usage();  # Check that all args were processed.
+
+if( $dir =~ m#/$# ) {    # allow directory name to end with /
+    chop $dir;        
+}
+
+opendir( DIR, $dir ) or die "can't opendir $dir: $!";
+
+@files = grep { /\.nc$/i } readdir( DIR );
+
+open(OUT,"> $out") || die "Can't open $out\n";
+
+print OUT $#files + 1, "\n";
+
+foreach $f ( @files ) {
+    print OUT "$dir/$f\n";
+}
+
+##########################################################################
+
+sub usage {
+    die <<EOF
+usage:  $ProgName directory_name out_file
+EOF
+}

@@ -1,0 +1,127 @@
+OBJ/mss.o : mss.c mss.h str_util.h
+OBJ/rgi.o : rgi.c str_util.h rgi.h
+OBJ/rgip.o : rgip.F OBJ/precision.o
+OBJ/str_util.o : str_util.c str_util.h
+OBJ/utim.o : utim.c utim.h
+OBJ/dyninp.o : dyninp.F OBJ/precision.o
+OBJ/advect.o : advect.F OBJ/precision.o pmgrid.h params.h OBJ/spitfire.o OBJ/histout.o tracnam.h
+OBJ/acsf.o : acsf.F OBJ/precision.o pmgrid.h params.h
+OBJ/advfix.o : advfix.F OBJ/precision.o pmgrid.h params.h advfix.com
+OBJ/aphys.o : aphys.F OBJ/constants.o OBJ/histout.o OBJ/conv_zhang.o OBJ/conv_hack.o OBJ/conv_pjr.o OBJ/precision.o pmgrid.h params.h
+OBJ/attach.o : attach.F 
+OBJ/calendar.o : calendar.F OBJ/precision.o calendar.com
+OBJ/ccmhist.o : ccmhist.F OBJ/precision.o params.h
+OBJ/charutl.o : charutl.F OBJ/calendar.o
+OBJ/cldfrc.o : cldfrc.F OBJ/precision.o implicit.h pmgrid.h params.h cloud.com
+OBJ/cldwat.o : cldwat.F OBJ/precision.o implicit.h pmgrid.h params.h mc.h eslookup.h
+OBJ/cloud.o : cloud.F OBJ/precision.o pmgrid.h params.h cloud.com OBJ/histout.o OBJ/cldwat.o
+OBJ/commentstr.o : commentstr.F OBJ/precision.o
+OBJ/constants.o : constants.F OBJ/precision.o
+OBJ/control.o : control.F OBJ/histout.o OBJ/calendar.o OBJ/precision.o control.com
+OBJ/conv_pjr.o : conv_pjr.F OBJ/precision.o params.h implicit.h pmgrid.h guang_pjr.h eslookup.h
+OBJ/conv_hack.o : conv_hack.F OBJ/precision.o implicit.h pmgrid.h params.h comcmf.h
+OBJ/conv_zhang.o : conv_zhang.F OBJ/precision.o implicit.h pmgrid.h params.h guang.h comcmf.h
+OBJ/cray_lib.o : cray_lib.F OBJ/precision.o
+OBJ/div.o : div.F OBJ/precision.o pmgrid.h params.h div.com
+OBJ/drymass.o : drymass.F OBJ/precision.o pmgrid.h params.h drymass.com mass.com
+OBJ/eslookup.o : eslookup.F params.h OBJ/precision.o eslookup.h pmgrid.h
+OBJ/etadot.o : etadot.F OBJ/precision.o pmgrid.h params.h etadot.com
+OBJ/fca2cs.o : fca2cs.c fca2cs.h
+OBJ/fgetenv.o : fgetenv.c 
+OBJ/fileUtils.o : fileUtils.F 
+OBJ/fsystem.o : fsystem.c 
+OBJ/gaussQuadPts.o : gaussQuadPts.F OBJ/precision.o pmgrid.h params.h
+OBJ/grid.o : grid.F params.h OBJ/precision.o pmgrid.h grid.com
+OBJ/histout.o : histout.F dst.h params.h OBJ/precision.o OBJ/rec_io.o pmgrid.h OBJ/calendar.o tracnam.h OBJ/scyc.o OBJ/caer.o dstgrd.h dstnm.h
+OBJ/initr0.o : initr0.F OBJ/precision.o pmgrid.h params.h
+OBJ/intpUtil.o : intpUtil.F OBJ/precision.o
+OBJ/iscosb.o : iscosb.c fca2cs.h
+OBJ/main.o : main.F dst.h params.h OBJ/acsf.o OBJ/advect.o OBJ/dyninp.o OBJ/histout.o OBJ/cldwat.o OBJ/scyc.o OBJ/acbnd.o OBJ/dmsbnd.o OBJ/soxbnd.o OBJ/caer.o OBJ/caerbnd.o OBJ/aod_assim_3d.o OBJ/precision.o OBJ/dstszdst.o OBJ/dsttvbds.o OBJ/calendar.o pmgrid.h control.com dstgrd.h OBJ/constants.o OBJ/conv_hack.o OBJ/conv_pjr.o OBJ/cloud.o OBJ/vdiff_mod.o OBJ/surface.o OBJ/sulchem.o OBJ/volcemission.o OBJ/sat_obs.o tracnam.h
+OBJ/mass.o : mass.F OBJ/precision.o pmgrid.h params.h mass.com
+OBJ/mass2nc.o : mass2nc.F OBJ/histout.o OBJ/precision.o pmgrid.h params.h mass2nc.com
+OBJ/ncUtil.o : ncUtil.F OBJ/precision.o
+OBJ/nextfn.o : nextfn.F 
+OBJ/physcan.o : physcan.F OBJ/precision.o pmgrid.h params.h control.com
+OBJ/physlic.o : physlic.F dst.h params.h OBJ/histout.o OBJ/advect.o OBJ/scyc.o OBJ/sulchem.o OBJ/caer.o OBJ/cloud.o OBJ/surface.o OBJ/vdiff_mod.o OBJ/wetdep.o OBJ/dstdpswet.o OBJ/dstdpsdry.o OBJ/dstmbl.o OBJ/precision.o OBJ/rec_io.o OBJ/aod_assim_3d.o pmgrid.h control.com tracnam.h ssltcom.h dstgrd.h dstnm.h
+OBJ/plevs.o : plevs.F OBJ/precision.o pmgrid.h params.h plevs.com
+OBJ/pmgrid.o : pmgrid.F pmgrid.h params.h
+OBJ/pottem.o : pottem.F OBJ/precision.o pottem.com pmgrid.h params.h
+OBJ/qneg.o : qneg.F OBJ/precision.o pmgrid.h params.h qneg.com implicit.h
+OBJ/rec_io.o : rec_io.F OBJ/precision.o
+OBJ/restart.o : restart.F OBJ/precision.o pmgrid.h params.h restart.com OBJ/advect.o OBJ/dyninp.o OBJ/histout.o
+OBJ/setqth.o : setqth.F OBJ/precision.o pmgrid.h params.h control.com
+OBJ/srcsnk.o : srcsnk.F OBJ/histout.o OBJ/caer.o OBJ/precision.o pmgrid.h params.h tracnam.h
+OBJ/surface.o : surface.F OBJ/precision.o pmgrid.h params.h OBJ/histout.o OBJ/acsf.o OBJ/scyc.o OBJ/sulemis.o OBJ/volcemission.o OBJ/caer.o tracnam.h
+OBJ/tracinp.o : tracinp.F OBJ/ccmhist.o OBJ/calendar.o pmgrid.h params.h tracinp.com tracnam.h
+OBJ/utils.o : utils.F OBJ/precision.o pmgrid.h params.h
+OBJ/vdiff_mod.o : vdiff_mod.F OBJ/precision.o params.h implicit.h pmgrid.h comvd.h compbl.h OBJ/histout.o
+OBJ/virtem.o : virtem.F OBJ/precision.o virtem.com pmgrid.h params.h
+OBJ/z.o : z.F OBJ/precision.o z.com pmgrid.h params.h
+OBJ/precision.o : precision.F90 
+OBJ/cosb_dum.o : cosb_dum.F OBJ/precision.o
+OBJ/pack_dum.o : pack_dum.F OBJ/precision.o
+OBJ/grib.o : grib.c gribr.h mss.h str_util.h utim.h rgi.h
+OBJ/gribr.o : gribr.c str_util.h gribr.h
+OBJ/lgtran.o : lgtran.F OBJ/precision.o
+OBJ/fft.o : fft.F OBJ/precision.o
+OBJ/spitfire.o : spitfire.F OBJ/precision.o pmgrid.h params.h OBJ/lgtran.o fixflux.h
+OBJ/acbnd.o : acbnd.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/error_messages.o
+OBJ/blmutl.o : blmutl.F OBJ/precision.o OBJ/dstmblutl.o pmgrid.h params.h dstgrd.h dstcst.h dstlsm.h dstblm.h
+OBJ/caer.o : caer.F90 params.h OBJ/pmgrid.o OBJ/precision.o OBJ/caerbnd.o
+OBJ/caerbnd.o : caerbnd.F90 OBJ/pmgrid.o OBJ/precision.o OBJ/error_messages.o
+OBJ/dmsbnd.o : dmsbnd.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/error_messages.o
+OBJ/erf.o : erf.F OBJ/precision.o
+OBJ/error_messages.o : error_messages.F90 
+OBJ/getsslt.o : getsslt.F params.h OBJ/precision.o pmgrid.h ssltcom.h
+OBJ/getu10.o : getu10.F params.h OBJ/precision.o pmgrid.h u10com.h implicit.h parpbl.h
+OBJ/massbgt.o : massbgt.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/error_messages.o
+OBJ/nc_f77.o : nc_f77.F dbg.com
+OBJ/optDepth.o : optDepth.F OBJ/precision.o pmgrid.h params.h dstgrd.h dstodx.h
+OBJ/scyc.o : scyc.F90 params.h
+OBJ/setzen.o : setzen.F OBJ/precision.o
+OBJ/sng_f77.o : sng_f77.F dbg.com
+OBJ/soxbnd.o : soxbnd.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/error_messages.o OBJ/calendar.o
+OBJ/sulbnd.o : sulbnd.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/error_messages.o
+OBJ/sulchem.o : sulchem.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/acbnd.o OBJ/histout.o OBJ/wetdep.o OBJ/massbgt.o
+OBJ/sulemis.o : sulemis.F90 OBJ/precision.o OBJ/pmgrid.o OBJ/scyc.o OBJ/dmsbnd.o OBJ/soxbnd.o OBJ/sulbnd.o OBJ/histout.o OBJ/massbgt.o
+OBJ/szdstlgn.o : szdstlgn.F OBJ/precision.o
+OBJ/utl_f77.o : utl_f77.F OBJ/precision.o dbg.com
+OBJ/vec_f77.o : vec_f77.F OBJ/precision.o dbg.com xtr.com
+OBJ/volcemission.o : volcemission.F OBJ/precision.o OBJ/pmgrid.o volcemis.h params.h pmgrid.h
+OBJ/xtr_f77.o : xtr_f77.F dbg.com xtr.com
+OBJ/drydep.o : drydep.F params.h OBJ/precision.o pmgrid.h drydep.h
+OBJ/drydepdr.o : drydepdr.F params.h OBJ/histout.o OBJ/scyc.o OBJ/caer.o OBJ/precision.o pmgrid.h drydep.h tracnam.h
+OBJ/wetdep.o : wetdep.F90 OBJ/precision.o OBJ/pmgrid.o
+OBJ/wetdepdr.o : wetdepdr.F OBJ/histout.o OBJ/wetdep.o OBJ/caer.o OBJ/precision.o pmgrid.h params.h tracnam.h
+OBJ/dpsdryutl.o : dpsdryutl.F OBJ/precision.o pmgrid.h params.h dstcst.h dstgrd.h
+OBJ/dstbdg.o : dstbdg.F OBJ/precision.o params.h dst.h dbg.com pmgrid.h dstbdg.h
+OBJ/dstblm.o : dstblm.F OBJ/precision.o pmgrid.h params.h dstcst.h dstblm.h
+OBJ/dstchm.o : dstchm.F OBJ/precision.o pmgrid.h params.h dstgrd.h dstchm.h dstcst.h dstaer.h dstctl.h dbg.com
+OBJ/dstcmnini.o : dstcmnini.F dst.h params.h OBJ/precision.o dstcst.h dstblm.h pmgrid.h dstgrd.h dstmsc.h dstnm.h dstszdst.h dstodx.h xtr.com dstaer.h
+OBJ/dstctl.o : dstctl.F dst.h params.h dstgrd.h dbg.com
+OBJ/dstdpsdry.o : dstdpsdry.F OBJ/precision.o dst.h params.h OBJ/histout.o OBJ/blmutl.o pmgrid.h dstgrd.h dstcst.h dstaer.h dstmsc.h dstnm.h dstctl.h dbg.com
+OBJ/dstdpswet.o : dstdpswet.F OBJ/precision.o dst.h params.h OBJ/histout.o pmgrid.h dstgrd.h dstcst.h dstblm.h dstmsc.h dstnm.h dstctl.h dbg.com
+OBJ/dstlsmbd.o : dstlsmbd.F OBJ/precision.o dstlsm.h
+OBJ/dstmbl.o : dstmbl.F dst.h params.h OBJ/precision.o OBJ/dstblm.o OBJ/histout.o OBJ/dstmblutl.o pmgrid.h dstgrd.h dstcst.h dstaer.h dstmsc.h dstnm.h dstctl.h dbg.com
+OBJ/dstmblutl.o : dstmblutl.F OBJ/precision.o pmgrid.h params.h dstgrd.h dstcst.h dstaer.h dstlsm.h dbg.com
+OBJ/dstmssutl.o : dstmssutl.F OBJ/precision.o pmgrid.h params.h dstgrd.h dstcst.h dstodx.h
+OBJ/dstrad.o : dstrad.F OBJ/precision.o pmgrid.h params.h dstgrd.h dstrad.h
+OBJ/dstradbd.o : dstradbd.F OBJ/precision.o params.h dst.h dstgrd.h dstrad.h
+OBJ/dstsfc.o : dstsfc.F OBJ/precision.o dstsfc.h params.h
+OBJ/dstszdst.o : dstszdst.F OBJ/precision.o dstgrd.h params.h dstaer.h dstszdst.h dstcst.h pmgrid.h dstctl.h dbg.com
+OBJ/dstszdstbd.o : dstszdstbd.F params.h OBJ/precision.o dstgrd.h dstszdst.h
+OBJ/dsttibds.o : dsttibds.F OBJ/precision.o dsttibds.h params.h dstsfc.h
+OBJ/dsttvbds.o : dsttvbds.F OBJ/precision.o dsttvbds.h params.h
+OBJ/analysis_3d.o : analysis_3d.F90 OBJ/floats.o OBJ/data_structures.o OBJ/obs_operator.o OBJ/f2v.o OBJ/mathlib.o OBJ/covariances_3d.o OBJ/error_messages.o OBJ/precision.o
+OBJ/aod_assim_3d.o : aod_assim_3d.F90 OBJ/floats.o OBJ/analysis_3d.o OBJ/data_structures.o OBJ/pmgrid.o OBJ/error_messages.o OBJ/precision.o OBJ/histout.o OBJ/caer.o tracnam.h dstgrd.h params.h OBJ/sat_obs.o ssltcom.h
+OBJ/avg_kernel.o : avg_kernel.F90 OBJ/precision.o OBJ/floats.o
+OBJ/covariances_3d.o : covariances_3d.F90 OBJ/floats.o OBJ/data_structures.o OBJ/geo.o OBJ/f2v.o OBJ/gaussian_weight.o OBJ/obs_operator.o OBJ/error_messages.o OBJ/precision.o
+OBJ/data_structures.o : data_structures.F90 OBJ/floats.o OBJ/precision.o
+OBJ/f2v.o : f2v.F90 OBJ/floats.o OBJ/precision.o
+OBJ/fldname.o : fldname.F pmgrid.h params.h tracnam.com
+OBJ/floats.o : floats.F90 OBJ/precision.o
+OBJ/gaussian_weight.o : gaussian_weight.F90 OBJ/floats.o OBJ/precision.o OBJ/geo.o OBJ/f2v.o
+OBJ/geo.o : geo.F90 OBJ/floats.o OBJ/precision.o
+OBJ/mathlib.o : mathlib.F90 OBJ/floats.o OBJ/precision.o
+OBJ/obs_operator.o : obs_operator.F90 OBJ/mathlib.o OBJ/avg_kernel.o OBJ/f2v.o OBJ/geo.o OBJ/precision.o
+OBJ/sat_obs.o : sat_obs.F90 OBJ/pmgrid.o OBJ/precision.o OBJ/calendar.o ssltcom.h

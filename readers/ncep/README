@@ -1,0 +1,97 @@
+README for ncep data reader
+John Caron, caron@ucar.edu
+doc last changed : 9/18/97
+code changes:
+    11/19/97: fix FLOAT=8 error
+
+These routines read NCEP grib files, either local or on the NCAR Mass Store.
+The interface is designed for MATCH.
+
+This is not a general purpose grib reader, but specific to reading the
+NCEP/NCAP reanalysis files into MATCH.  The Grib table used is specific to
+this dataset.  The actual variables that it can read are based on what MATCH 
+currently needs in order to run advection/convection/diffusion, and what NCEP 
+can provide. These variables for Match (and their NCEP equivalents) are:
+
+			match		NCEP
+			-----		-----
+  surface geopotential	phis 		9.80665 * HGT (3d)
+  orography		oro		a mapping of ICEC and LAND (2d)
+  surface pressure	ps		PRES (3d)
+  specific humidity	q		SPFH, min 1.0e-12, max saturation q (3d)
+  temperature		t		TMP (3d)
+  horiz winds		uv		UGRD, VGRD (3d)
+  surface temperature   ts		TMP (2d) <----------- was bad
+  zonal surface stress  taux		UFLX (2d)
+  meridional surface stress tauy	VFLX (2d)
+  surface sensible heat flux hflx	SHTFL (2d)
+  surface water vapor flux qflx		(LHTFL / 2.31e6) (2d)
+
+	
+Source Files:
+    reader.F		fortran interface
+    reader.inc		include common
+    grib.[ch]		called by reader
+    gribr.[ch]  	actual grib reader
+
+    ../mss.[ch]		mass store files management
+    ../str_util.[ch]	string utilities
+    ../utim.[ch]	time conversion utilities
+    ../rgi.[ch]		regridding routine
+    ../rgip.F		to allow vectorization
+
+    Note that you need the netcdf library for rgi.
+
+Run time files: these files must exist in the current working directory
+   of the running program. All exist in readers/ncep/data directory.
+
+    grib.table2.rean	table of NCEP/NCAR reanalysis grib parameters, obtained 
+			from ftp://wesley.wwb.noaa.gov/pub/wgrib/kpds5.v21.Z
+    grb2d.list  	list of ncep 2d grib files, in sequential order
+    grbsanl.list  	list of ncep 3d grib "grbsanl" files, in sequential order
+    T62n.T42n.avg.nc	a netcdf file used to convert T62 to T42 grid
+
+
+Mass Store Management
+
+    The list of ncep files are in the following blank-delimited format:
+	    	<filename> <size> <starting_time>
+       The time is in "unix seconds", seconds since 1/1/70 0Z
+       I have generated such a list from the mass store files at NCAR (1/90 to 8/96)
+       The actual files available start in 1973.
+			
+    The mss.c routines do the following:
+	  1) check if the file exists in local path, and that file sizes match.
+	  2) if not, generates a call to the mass store (e.g. mssread on the CRAY)
+	     to get it. The mass store system is responsible for un-COS blocking it.
+	  3) optionally waits until the file arrives.  It checks the file size to make
+	     sure that all of it has been transferred.
+  	  
+    The grib.c routines do the following:
+	  1) As requests are made, fetch the mss files as needed.
+	  2) "look ahead" one mss file, so we never have to wait
+	  3) only keep current and next files; delete older ones.
+	  4) interpolate and reorder the data as requested.
+
+    The gribr.c routines do the following:
+	  1) when opening a file, read through all headers and create an index file
+	     af all the products = field, level, time.  The index file is called
+	     <filename>.index.  If it already exists, use it. The last line of the
+	     index file has "DONE-DONE-DONE" to eliminate aborted reads.
+	  2) The files are actually tar files, but gribr ignores that fact, and simply
+	     locates the grib record inside the tar file.
+	  3) Read and convert the grib records into floating point arrays.
+
+
+Regridding
+	The reader optionally regrids the NCEP T62 grid to T42 (actually it could be
+	any other grid, but currently set up for T42)
+
+	We use an area-weighted average algorithm. Intersections in lat/lon space are 
+	done as simple rectangles, then areas are computed using 
+		dlon * (sin(lat2) - sin(lat1)).
+	The sum of the fractional intersections always add up to 1.0.  These weights 
+	are precalculated by the program rg_2netcdf, which stores them in the netcdf 
+	file T62.T42.avg.nc.
+
+	The call to grib_open has a parameter that controls whether to regrid or not.
