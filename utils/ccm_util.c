@@ -10,6 +10,7 @@
 #include "ccm_util.h"
 #include "fortio.h"
 #include "crpack.h"
+#include "cr-ieee.h"
 
 #define NINTS 32    /* no. of ints read from header to get size info */
 #define SPVAL 1.e36 /* special value used by ccm processor */

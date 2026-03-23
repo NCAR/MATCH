@@ -1,0 +1,14 @@
+name: match-post
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10
+  - numpy
+  - matplotlib
+  - cartopy
+  - xarray
+  - netcdf4
+  - libnetcdf
+  - scipy
+  - seaborn

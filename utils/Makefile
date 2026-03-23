@@ -11,7 +11,7 @@ src_hsum = hsum.c \
 obj_hsum = $(src_hsum:.c=.o)
 
 CC = gcc
-NETCDF_DIR = /usr/local/NetCDF/netcdf
+NETCDF_DIR = $(CONDA_PREFIX)
 cpp_path = -I./ -I$(NETCDF_DIR)/include
 CPPFLAGS = -DIEEE_DP $(cpp_path)
 CFLAGS = -O

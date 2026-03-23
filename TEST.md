@@ -96,6 +96,52 @@ python run_translation.py 2026 3 --all
 
 But this requires complete CORe source data for the month (currently only through Mar 18).
 
+## CORe Test Run — Feb 2026
+
+### Completed
+
+1. **CORe run script** created: `control/run_sarb4_hourly_202602_core.sh`
+   - Uses CORe-translated GRIB via CDAS-CORe pipeline
+   - ICDATE=20260201, hourly output (NHTFRQ=-1, MFILT=1)
+   - 12 tracers: SO2, SO4, DMS, H2O2, DSTQ01-04, OCPHO, BCPHO, OCPHI, BCPHI
+   - Run completed: 672 hourly history files in `~/Data/MATCH/2026/sarb4_hourly_202602_core/`
+
+2. **Built `ccm2nc` converter** (`utils/ccm2nc`):
+   - Fixed missing C standard library headers for modern GCC (`ccm_util.c`, `crpack.c`,
+     `parse.c`, `strops.c`, `hsum.c`)
+   - Makefile updated to use `$(CONDA_PREFIX)` for netCDF path — requires `conda activate`
+     before `make`
+
+3. **Converted all output to netCDF**:
+   - `control/convert_core_nc.sh` — batch conversion script (skips existing `.nc` files)
+   - 672 files converted successfully (h0001.nc–h0672.nc, ~53 MB each)
+
+4. **AOD plot script** created: `control/plot_aod_core.py`
+   - NCAR brand styling (DAVINCI-MONET) matching `~/EarthSystem/CDAS-CORe/plot_diagnostics.py`
+   - Robinson projection, YlOrBr colormap, horizontal colorbar, 300 DPI PNG + PDF
+   - Supports `--ref-dir` for comparison runs with RdBu_r difference plots
+   - 5 monthly-mean AOD maps: total (AEROD), sulfate (SO4OD), dust (DSTODXC),
+     sea salt (SSLTOD), carbonaceous (OC+BC sum)
+
+5. **Conda environment** spec: `control/environment.yml` (`match-post`)
+
+### Results — CORe Feb 2026
+
+- Sulfate, sea salt, and carbonaceous AOD look physically reasonable
+- **Dust AOD is very high** — Saharan/Arabian plume saturates above 0.5
+  - Suspect: CORe surface winds or soil moisture over dust source regions differ
+    from CDAS, amplifying dust emissions
+  - Needs validation against MODIS/VIIRS and AERONET for Feb 2026
+
+### CDAS Jan 2026 Run (existing)
+
+- `~/Data/MATCH/2026/sarb4_hourly_202602/` — **actually covers Jan 2026** (20260101–20260201)
+  despite directory name
+- 747 history files, last file (h0747) truncated (run didn't finish cleanly)
+- 746 files converted to netCDF; AOD plots generated with correct "Jan 2026" labels
+- **Cannot diff CORe vs CDAS** — different months (Feb vs Jan)
+- Proper comparison requires a CDAS Feb run or CORe Jan run
+
 ## Reference — Key Paths
 
 | Item | Path |
@@ -110,3 +156,9 @@ But this requires complete CORe source data for the month (currently only throug
 | CORe source data | `~/Data/CORe/{pgb,flx}/2026/` |
 | Run directories | `~/Data/MATCH/2026/` |
 | MODIS assim data | `~/Data/modis_assim_combo/2026/` (empty, not needed if doAODasm=.false.) |
+| ccm2nc converter | `~/EarthSystem/MATCH/utils/ccm2nc` |
+| Batch convert script | `~/EarthSystem/MATCH/control/convert_core_nc.sh` |
+| AOD plot script | `~/EarthSystem/MATCH/control/plot_aod_core.py` |
+| Conda env spec | `~/EarthSystem/MATCH/control/environment.yml` |
+| CORe Feb plots | `~/Data/MATCH/2026/sarb4_hourly_202602_core/plots/` |
+| CDAS Jan plots | `~/Data/MATCH/2026/sarb4_hourly_202602/plots/` |

@@ -2,6 +2,7 @@
 
 /* String operations not in the standard C library. */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "strops.h"
