@@ -512,9 +512,9 @@ c uv(*,*,2,*) is the meridional wind, units: m/s.
 	if (want_diag_vdiff) then
 
 c    surface temperature, units = K
-c    note: we take level 7 of 2D field "TMP "
+c    note: level 0 = surface (kpds6=1)
           from_2d_dataset = 1
-          level = 7
+          level = 0
 	  ret = grib_interp( "TMP ", from_2d_dataset, level,
      $         date_fcst,datesec_fcst, 
      $         ts, 1, nlond, 0)
