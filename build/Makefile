@@ -1,6 +1,6 @@
 makdep = ./makdep_usrbinperl
 precision_mode = r8
-CONDA_PREFIX = $(HOME)/miniconda3
+CONDA_PREFIX = $(HOME)/miniconda3/envs/sarb
 usrCPP_INCS = -I$(CONDA_PREFIX)/include
 nchdflib = -L$(CONDA_PREFIX)/lib -lnetcdff -lnetcdf -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lsz -lz
 usrCPP_DEFS_AER = -DDST -DCAER -DSCYC -DWETDEP -DDRYDEP -DASSIM
@@ -49,13 +49,13 @@ ifdef usrCPP_DEFS
 endif	
 CPP_INCS := $(cpp_path) $(usrCPP_INCS)
 
-FC = /Users/Dfillmor/bin/gfortran
+FC = $(HOME)/bin/gfortran
 ifeq ($(useF77),TRUE)
   FC = $(fc77)
 endif
 FFLAGS = $(usrFFLAGS)
 
-CC = /Users/Dfillmor/bin/gcc
+CC = $(HOME)/bin/gcc
 CFLAGS = -DLINUX
 objflag = -c -o $@
 

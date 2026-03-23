@@ -187,7 +187,7 @@ static int Read_grib(FILE *file, long pos, long len_grib, unsigned char *buffer)
 
 static int GetGridParams (GRIBR_t *g, int *nx, int *ny)
 {
-     if (g->pds.grid_id != 255)
+     if (g->pds.grid_id != 255 && g->pds.grid_id != 98)
 	return -1;
     switch (g->gds.type) {
       case 4:			/* Gaussian Lat/Lon grid */

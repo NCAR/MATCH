@@ -1,4 +1,4 @@
-OBJ/mss.o : mss.c mss.h str_util.h
+OBJ/mss.o : mss.c mss.h str_util.h utim.h
 OBJ/rgi.o : rgi.c str_util.h rgi.h
 OBJ/rgip.o : rgip.F OBJ/precision.o
 OBJ/str_util.o : str_util.c str_util.h
@@ -61,7 +61,7 @@ OBJ/precision.o : precision.F90
 OBJ/cosb_dum.o : cosb_dum.F OBJ/precision.o
 OBJ/pack_dum.o : pack_dum.F OBJ/precision.o
 OBJ/grib.o : grib.c gribr.h mss.h str_util.h utim.h rgi.h
-OBJ/gribr.o : gribr.c str_util.h gribr.h
+OBJ/gribr.o : gribr.c utim.h str_util.h gribr.h
 OBJ/lgtran.o : lgtran.F OBJ/precision.o
 OBJ/fft.o : fft.F OBJ/precision.o
 OBJ/spitfire.o : spitfire.F OBJ/precision.o pmgrid.h params.h OBJ/lgtran.o fixflux.h

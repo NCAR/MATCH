@@ -39,3 +39,13 @@
 
 # debug information files
 *.dwo
+
+# Input data (too large for git)
+data/
+
+# Build artifacts
+build/match
+build/OBJ/
+
+# GRIB index files
+*.index

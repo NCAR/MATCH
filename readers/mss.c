@@ -255,8 +255,9 @@ void MSSget_next( MSS_t *mss)
     {
 	if (mss->current >= mss->nfiles-1)
 	    {
-	    printf("MSSget_next : no more files: %d, %d\n",
-		mss->current+1, mss->nfiles);
+	    fprintf(stderr,"MSSget_next: end of file list (%d files), no more data available\n",
+		mss->nfiles);
+	    return;
 	    }
 
 	MSSget( mss, mss->file[mss->current+1].name, 0);

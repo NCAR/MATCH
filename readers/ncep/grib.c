@@ -306,6 +306,12 @@ static int OpenOneFile( Dataset *ds, int index)
 
 	if (index < 0)
 	    return -1;
+	if (index >= ds->mss->nfiles)
+	    {
+	    fprintf(stderr,"OpenOneFile: file index %d beyond end of file list (%d files)\n",
+		index, ds->mss->nfiles);
+	    return 0;
+	    }
 	file = &ds->mss->file[index];
 
         /* open the file */

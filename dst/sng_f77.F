@@ -284,28 +284,8 @@ c     String 'Date' was found---CVS expansion is -kk or -kkv
          write (6,'(a,i2)') 'slash_ptr: ',slash_ptr
       endif
 
-      call strnul(CVS_Revision)
-      call strnul(CVS_Date)
       call strini(prg_ID)
-      if (CVS_typ == CVS_kk) then
-         prg_ID='Source file unknown Version unknown Date unknown' // char(0)
-      else 
-         prg_ptr=f_strstr(CVS_Id,',v') ! ',v' is right after program name
-         if (prg_ptr < 0) stop 'ERROR: prg_ID_mk() unable to find source code name'
-         if (CVS_typ == CVS_kv) then
-            prg_ID=CVS_Id(1:prg_ptr-1) // 
-     $           ' version ' // CVS_Revision(1:f_strlen(CVS_Revision)) // 
-     $           ' dated ' // CVS_Date(1:f_strlen(CVS_Date)) // ' GMT' // char(0)
-         else if (CVS_typ == CVS_kkv) then
-            vrs_ptr=f_strstr(CVS_Revision,'ion:') ! 'ion:' should appear two characters before version
-            if (vrs_ptr < 0) stop 'ERROR: prg_ID_mk() unable to find revision number'
-            prg_ID=CVS_Id(6:prg_ptr-1) // 
-     $           ' version ' // CVS_Revision(vrs_ptr+5:f_strlen(CVS_Revision)-2) // 
-     $           ' dated ' // CVS_Date(8:26) // ' GMT' // char(0)
-         else 
-            write (6,'(a,a)') prg_nm(1:f_strlen(prg_nm)),': ERROR prg_ID_mk() reports unknown CVS_typ'
-         endif                  ! endif
-      endif                     ! endif
+      prg_ID='MATCH' // char(0)
       return
       end                       ! end prg_ID_mk()
       

@@ -7,44 +7,62 @@
 - **NetCDF libraries**: netCDF-C and netCDF-Fortran with HDF5 support
 - **Make**: GNU Make
 
-## macOS (Apple Silicon) Setup
+## Platform Setup
 
-On macOS without admin/Homebrew access, compilers and libraries can
-be installed entirely in user space via conda-forge:
+Compilers and libraries are installed via conda-forge. The conda
+compilers use target-prefixed names. Create short symlinks in
+`~/bin` for convenience, and ensure `~/bin` is on your `PATH`.
+
+### Linux (Ubuntu x86_64)
 
 ```bash
-# Install compilers
-conda install -c conda-forge gfortran_osx-arm64 gcc_osx-arm64
+# Install compilers and NetCDF/HDF5 into your conda environment
+conda install -n sarb -c conda-forge gfortran_linux-64 netcdf-fortran hdf5 libnetcdf
 
-# Install netCDF and HDF5
-conda install -c conda-forge netcdf-fortran hdf5 libnetcdf
+# Create symlinks
+mkdir -p ~/bin
+ln -sf ~/miniconda3/envs/sarb/bin/x86_64-conda-linux-gnu-gfortran ~/bin/gfortran
+ln -sf ~/miniconda3/envs/sarb/bin/x86_64-conda-linux-gnu-gcc ~/bin/gcc
 ```
 
-The conda compilers use target-prefixed names
-(e.g. `arm64-apple-darwin20.0.0-gfortran`). Create short symlinks
-in `~/bin` for convenience:
+Makefile settings for Linux:
+
+```makefile
+CONDA_PREFIX = $(HOME)/miniconda3/envs/sarb
+FC = $(HOME)/bin/gfortran
+CC = $(HOME)/bin/gcc
+```
+
+### macOS (Apple Silicon)
 
 ```bash
+# Install compilers and NetCDF/HDF5
+conda install -c conda-forge gfortran_osx-arm64 gcc_osx-arm64
+conda install -c conda-forge netcdf-fortran hdf5 libnetcdf
+
+# Create symlinks
 mkdir -p ~/bin
 ln -sf ~/miniconda3/bin/arm64-apple-darwin20.0.0-gfortran ~/bin/gfortran
 ln -sf ~/miniconda3/bin/arm64-apple-darwin20.0.0-gcc ~/bin/gcc
 ```
 
-Ensure `~/bin` is on your `PATH`.
+Makefile settings for macOS:
 
-### macOS-specific Makefile settings
+```makefile
+CONDA_PREFIX = $(HOME)/miniconda3
+FC = $(HOME)/bin/gfortran
+CC = $(HOME)/bin/gcc
+```
 
-The Makefile shipped in `build/` is configured for macOS with
-conda-forge toolchains. Key differences from a Linux build:
+Note: macOS does not support fully static linking, so
+`usrLDFLAGS = -g` is used instead of `--static`.
 
-- **No `--static` linker flag** — macOS does not support fully
-  static linking. Use `usrLDFLAGS = -g` instead.
-- **GCC 15 compatibility flags** — Modern gfortran requires
-  `-fallow-invalid-boz` (for octal BOZ literals in legacy code) and
-  `-fallow-argument-mismatch` (for legacy Fortran calling conventions).
-  These are included in `usrFFLAGS`.
-- **`CONDA_PREFIX`** — The Makefile uses this variable to locate
-  headers and libraries under `~/miniconda3`.
+### Compiler compatibility flags
+
+Modern gfortran (GCC 13+) requires `-fallow-invalid-boz` (for octal
+BOZ literals in legacy code) and `-fallow-argument-mismatch` (for
+legacy Fortran calling conventions). These are included in
+`usrFFLAGS`.
 
 ## Building the Model
 
@@ -53,12 +71,14 @@ conda-forge toolchains. Key differences from a Linux build:
 Edit the top section of `build/Makefile` to set paths for your system:
 
 ```makefile
-# Conda environment (adjust if not using default miniconda3 location)
-CONDA_PREFIX = $(HOME)/miniconda3
+# Conda environment — set to base miniconda3 or a named env
+# Linux example:  $(HOME)/miniconda3/envs/sarb
+# macOS example:  $(HOME)/miniconda3
+CONDA_PREFIX = $(HOME)/miniconda3/envs/sarb
 
-# Compiler paths (use absolute paths or ensure ~/bin is on PATH)
-FC = /Users/yourusername/bin/gfortran
-CC = /Users/yourusername/bin/gcc
+# Compiler paths (symlinks in ~/bin — see Platform Setup above)
+FC = $(HOME)/bin/gfortran
+CC = $(HOME)/bin/gcc
 
 # NetCDF/HDF5 include and library paths
 usrCPP_INCS = -I$(CONDA_PREFIX)/include
