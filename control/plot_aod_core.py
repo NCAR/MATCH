@@ -88,17 +88,31 @@ def save_figure(fig, name, output_dir):
 
 # ── Plot functions ──────────────────────────────────────────────────────
 
+def _aod_levels(vmax):
+    """Non-uniform AOD contour levels (CERES-SARB / DAVINCI convention).
+
+    Fine resolution at low values, then coarse steps above 0.04, capped at *vmax*.
+    For small vmax (< 0.25) use 0.01 coarse steps to keep enough contour detail.
+    """
+    fine = np.array([0.00, 0.005, 0.01, 0.02, 0.03, 0.04])
+    step = 0.01 if vmax < 0.25 else 0.05
+    coarse = np.arange(0.05, vmax + step / 2, step)
+    levels = np.concatenate([fine, coarse])
+    levels = levels[levels <= vmax + 1e-9]
+    return levels
+
+
 def plot_aod_map(data, lats, lons, title, vmin, vmax, output_dir, filename,
-                 cmap="YlOrBr", nlevels=20):
+                 cmap="turbo", nlevels=20):
     """Global map of a 2-D AOD field on Robinson projection."""
     data_cyc, lons_cyc = add_cyclic_point(data, coord=lons)
 
     fig = plt.figure(figsize=(12, 5), constrained_layout=True)
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
 
-    levels = np.linspace(vmin, vmax, nlevels + 1)
+    levels = _aod_levels(vmax)
     cf = ax.contourf(lons_cyc, lats, data_cyc, levels=levels, cmap=cmap,
-                     extend="both", transform=ccrs.PlateCarree())
+                     extend="max", transform=ccrs.PlateCarree())
     cf.set_rasterized(True)
 
     ax.coastlines(linewidth=0.5, color=NCAR_COLORS["gray"])
@@ -122,7 +136,7 @@ def plot_diff_map(data, lats, lons, title, vmax_diff, output_dir, filename,
     fig = plt.figure(figsize=(12, 5), constrained_layout=True)
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
 
-    levels = np.linspace(-vmax_diff, vmax_diff, nlevels + 1)
+    levels = np.arange(-vmax_diff, vmax_diff + 0.025, 0.05)
     cf = ax.contourf(lons_cyc, lats, data_cyc, levels=levels, cmap="RdBu_r",
                      extend="both", transform=ccrs.PlateCarree())
     cf.set_rasterized(True)
@@ -164,7 +178,7 @@ AOD_FIELDS = [
         "varname": "DSTODXC",
         "filename": "aod_dust",
         "vmin": 0.0,
-        "vmax": 0.5,
+        "vmax": 0.8,
         "vmax_diff": 0.3,
     },
     {
