@@ -798,18 +798,28 @@ int GRIB_INTERP
 	/* find the bracketing time indices */
 	if (want_time < ds->time[0].utime)
 	    {
-	    fprintf(stderr,"ERROR grib_interp: time %d %d == %s before first data time = %s\n", 
+	    /* Clamp to first available time step instead of failing.
+	       This allows running without the previous month's data;
+	       the first few hours use uninterpolated (held) values. */
+	    fprintf(stderr,"WARNING grib_interp: time %d %d == %s before first data time = %s, clamping\n",
 		*date, *datesec,  gmtime_str( &want_time), gmtime_str( &ds->time[0].utime));
-	    return 0;
+	    want_time = ds->time[0].utime;
 	    }
          if (want_time >= ds->time[ds->ntimes-1].utime)
             {
-            int index = ++ds->mss_current;
+            int index = ds->mss_current + 1;
             if ((index >= ds->mss->nfiles) || (1 != OpenOneFile( ds, index)))
                 {
-                fprintf(stderr,"ERROR grib_interp: time %d %d == %s after last data time = %s\n",
+                /* Clamp to last available time step instead of failing.
+                   This allows running without the next month's data;
+                   the final few hours use uninterpolated (held) values. */
+                fprintf(stderr,"WARNING grib_interp: time %d %d == %s after last data time = %s, clamping\n",
                         *date, *datesec,  gmtime_str( &want_time), gmtime_str( &ds->time[ds->ntimes-1].utime));
-		return 0;
+                want_time = ds->time[ds->ntimes-1].utime;
+		}
+	    else
+		{
+		ds->mss_current = index;
 		}
             }
 	    
@@ -829,18 +839,23 @@ int GRIB_INTERP
 	REAL dt, dtm1;
 	REAL *adata, *bdata;
 
-	/* Fetch the data */
+	/* Fetch the data; clamp after-index to avoid out-of-bounds
+	   when want_time was clamped to the last available time step */
+	int timidx_after = (timidx+1 < ds->ntimes) ? timidx+1 : timidx;
 	DataVol *before = GetData( ds, fldidx, *level, timidx);
-	DataVol *after = GetData( ds, fldidx, *level, timidx+1);		
+	DataVol *after = GetData( ds, fldidx, *level, timidx_after);
 	if ((before == NULL) || (after == NULL))
 	    return 0;
 	    
         bdata = Regrid ? before->regrid_data : before->data;
         adata = Regrid ? after->regrid_data : after->data;
 
-	/* interpolate */
-	dt = (REAL)(after->utime-want_time)/(REAL)(after->utime - before->utime);
-	dtm1 = 1.0 - dt;
+	/* interpolate (guard divide-by-zero when clamped to single time step) */
+	if (after->utime == before->utime)
+	    { dt = 1.0; dtm1 = 0.0; }
+	else
+	    { dt = (REAL)(after->utime-want_time)/(REAL)(after->utime - before->utime);
+	      dtm1 = 1.0 - dt; }
 	
 	DPRINT "    %ld = %g * %ld + %g * %ld\n",
 		(long)want_time, dt, (long)before->utime, dtm1, (long)after->utime);
