@@ -228,11 +228,12 @@ c     Soil moisture
 c     Rescale soil moisture to match CDAS distribution for dust emission.
 c     CORe SOILW uses 18-bit packing (range 0.02-1.0) vs CDAS 9-bit
 c     (range 0.10-0.43); the dry bias drives excessive dust emission.
-c     Linear fit from paired CORe-CDAS Feb 2026 data, clamped to CDAS
-c     range. Applied here (not in reader) so dry deposition of non-dust
-c     species uses the unmodified soil moisture.
+c     Linear fit from paired CORe-CDAS Feb 2026 data, weakened 25%
+c     toward identity to account for spin-up amplification. Clamped
+c     to CDAS range. Applied here (not in reader) so dry deposition
+c     of non-dust species uses the unmodified soil moisture.
       do i=1,plon
-        vwc_sfc(i) = 0.6235*vwc_sfc(i) + 0.1257
+        vwc_sfc(i) = 0.7176*vwc_sfc(i) + 0.0943
         vwc_sfc(i) = max( vwc_sfc(i), 0.1 )
         vwc_sfc(i) = min( vwc_sfc(i), 0.43 )
       end do
