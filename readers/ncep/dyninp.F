@@ -618,10 +618,14 @@ c    volumetric soil water content at surface (frac)
               print *, 'ERROR : grib_interp FAILED on vwcsfc'
               call abort
           end if
-c         Set missing values to 0.0
+c         Rescale soil moisture to match CDAS distribution
+c         (CORe SOILW has different encoding/range than CDAS;
+c          linear fit from paired CORe-CDAS Feb 2026 data, R²=0.69)
           do j=1,nlat
               do i=1,nlon
-                vwcsfc(i,j) = max( vwcsfc(i,j), 0.0_r8 )
+                vwcsfc(i,j) = 0.5664_r8 * vwcsfc(i,j) + 0.1448_r8
+                vwcsfc(i,j) = max( vwcsfc(i,j), 0.1_r8 )
+                vwcsfc(i,j) = min( vwcsfc(i,j), 0.43_r8 )
               enddo
           enddo
 
