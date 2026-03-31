@@ -117,7 +117,7 @@ c     Initialize output
 c     Compute threshold soil moisture based on clay content
 c     vwc_thr=mss_frc_cly*(0.17+0.14*mss_frc_cly) ! [m3 m-3] FMB99 p. 155 (14)
 c     fxm: 19991105 remove factor of mss_frc_cly from vwc_thr to improve large scale behavior
-      vwc_thr(1:plon)=0.17+0.14*mss_frc_cly(1:plon) ! [m3 m-3] 
+      vwc_thr(1:plon)=0.17+0.14*mss_frc_cly(1:plon) ! [m3 m-3]
 c     Adjust threshold velocity for inhibition by moisture
 c     frc_thr_wet_fct(lon_idx)=exp(22.7*vwc_sfc(lon_idx)) ! [frc] SRL96
       where (vwc_sfc(1:plon) > vwc_thr(1:plon).and.flg_mbl(1:plon))
