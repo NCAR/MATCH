@@ -700,19 +700,23 @@ int GRIB_GETDATA
 	/* find the bracketing time indices */
 	if (want_time < ds->time[0].utime)
 	    {
-	    fprintf(stderr,"ERROR grib_getdata: time %d %d == %s before first data time = %s\n", 
+	    fprintf(stderr,"WARNING grib_getdata: time %d %d == %s before first data time = %s, clamping\n",
 		*date, *datesec,  gmtime_str( &want_time), gmtime_str( &ds->time[0].utime));
-	    return 0;
+	    want_time = ds->time[0].utime;
 	    }
 	 if (want_time >= ds->time[ds->ntimes-1].utime)
 	    {
 	    /* here we force it to get the next file in the sequence */
-	    int index = ++ds->mss_current;
+	    int index = ds->mss_current + 1;
 	    if ((index >= ds->mss->nfiles) || (1 != OpenOneFile( ds, index)))
 	    	{
-	    	fprintf(stderr,"ERROR grib_getdata: time %d %d == %s after last data time = %s\n", 
+	    	fprintf(stderr,"WARNING grib_getdata: time %d %d == %s after last data time = %s, clamping\n",
 			*date, *datesec,  gmtime_str( &want_time), gmtime_str( &ds->time[ds->ntimes-1].utime));
-	    	return 0;
+		want_time = ds->time[ds->ntimes-1].utime;
+		}
+	    else
+		{
+		ds->mss_current = index;
 		}
 	    }
 	    
