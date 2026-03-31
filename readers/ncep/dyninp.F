@@ -444,9 +444,10 @@ c	real(r8) uv(nlond,nlev,2,nlatd)
 	real(r8) qrad(nlond,nlev,nlat)
         real(r8) omga(nlond,nlev,nlat)
 c local
-	integer i,j 
+	integer i,j
 	integer grib_interp, ret
         integer from_2d_dataset, level
+        real(r8) vwc_raw, vwc_new, alpha
 c-grb2d  variables to hold offset times
         integer :: datesec_avg
         integer :: datesec_fcst
@@ -618,14 +619,27 @@ c    volumetric soil water content at surface (frac)
               print *, 'ERROR : grib_interp FAILED on vwcsfc'
               call abort
           end if
-c         Rescale soil moisture to match CDAS distribution
-c         (CORe SOILW has different encoding/range than CDAS;
-c          linear fit from paired CORe-CDAS Feb 2026 data, R²=0.69)
+c         Rescale soil moisture in arid regions to match CDAS distribution.
+c         CORe SOILW uses 18-bit packing (range 0.02-1.0) vs CDAS 9-bit
+c         (range 0.10-0.43); the dry bias drives excessive dust emission.
+c         Apply full rescaling where raw SOILW < 0.2 (arid/dust sources),
+c         no rescaling where raw SOILW > 0.3 (vegetated), linear blend
+c         in between to avoid discontinuity.
           do j=1,nlat
               do i=1,nlon
-                vwcsfc(i,j) = 0.5664_r8 * vwcsfc(i,j) + 0.1448_r8
-                vwcsfc(i,j) = max( vwcsfc(i,j), 0.1_r8 )
-                vwcsfc(i,j) = min( vwcsfc(i,j), 0.43_r8 )
+                if (vwcsfc(i,j) .ge. 0.0_r8) then
+                  vwc_raw = vwcsfc(i,j)
+                  vwc_new = 0.6235_r8 * vwc_raw + 0.1257_r8
+                  vwc_new = max( vwc_new, 0.1_r8 )
+                  vwc_new = min( vwc_new, 0.43_r8 )
+                  if (vwc_raw .lt. 0.2_r8) then
+                    vwcsfc(i,j) = vwc_new
+                  else if (vwc_raw .lt. 0.3_r8) then
+                    alpha = (vwc_raw - 0.2_r8) / 0.1_r8
+                    vwcsfc(i,j) = (1.0_r8 - alpha)*vwc_new
+     $                          + alpha*vwc_raw
+                  endif
+                endif
               enddo
           enddo
 
