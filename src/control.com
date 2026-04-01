@@ -83,12 +83,18 @@ c     time index N-1 to time index N.
 c     Updating advected Q and potential temperature.
       real(r8)
      $  qrelax      ! Relaxation factor for "nudging" predicted Q field
-c                   ! towards input Q field.  qrelax=1 => Q is reset to the 
-c                   ! input values each timestep.  qrelax=0 => Q evolves 
+c                   ! towards input Q field.  qrelax=1 => Q is reset to the
+c                   ! input values each timestep.  qrelax=0 => Q evolves
 c                   ! without being affected by the input Q field except for
 c                   ! being initialized by it.  The default value is ~ .1.
+     $, vwc_scale   ! [frc] Soil moisture rescaling slope for dust emission
+c                   ! vwc_sfc = vwc_scale*vwc_sfc + vwc_offset
+c                   ! Default 1.0 (identity). Set per-month when tuning
+c                   ! against MODIS/VIIRS column AOD.
+     $, vwc_offset  ! [m3 m-3] Soil moisture rescaling offset for dust emission
+c                   ! Default 0.0 (identity).
 
-      common /control2/ qrelax
+      common /control2/ qrelax, vwc_scale, vwc_offset
 
 
 

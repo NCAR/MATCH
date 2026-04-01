@@ -95,6 +95,8 @@ cat > namelist << END1
  DOWETDEP = .true.
  DODRYDEP = .true.
  VOLCEMIS = .false.
+ vwc_scale  = 0.6802
+ vwc_offset = 0.1068
  QMIN     = 12*1.e-20, 1.e-14
  soxsfconst = .false.
  soxsfyr  = 1995

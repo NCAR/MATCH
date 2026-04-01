@@ -82,6 +82,7 @@ c--match
 #include <dstaer.h> /* Aerosol microphysical properties */
 #include <dstmsc.h> /* Miscellaneous variables for dust parameterization */
 #include <dstnm.h> /* Nomenclature for outfld() */
+#include <control.com> /* vwc_scale, vwc_offset for soil moisture rescaling */
 !#include <dstblm.h> /* Physical constants for boundary layer meteorology */
 c     Parameters
 !      real(r8),parameter::flx_mss_fdg_fct=5.0e-4 ! [frc] Global mass flux tuning factor (empirical)
@@ -225,18 +226,18 @@ c     Soil moisture
      $     lat_idx,             ! I [idx] Latitude index
      $     plon,                ! I [frc] Dimension size (normally plon)
      $     vwc_sfc)             ! O [m3 m-3] Volumetric water content
-c     Rescale soil moisture to match CDAS distribution for dust emission.
-c     CORe SOILW uses 18-bit packing (range 0.02-1.0) vs CDAS 9-bit
-c     (range 0.10-0.43); the dry bias drives excessive dust emission.
-c     Linear fit from paired CORe-CDAS Feb 2026 data, weakened 25%
-c     toward identity to account for spin-up amplification. Clamped
-c     to CDAS range. Applied here (not in reader) so dry deposition
-c     of non-dust species uses the unmodified soil moisture.
-      do i=1,plon
-        vwc_sfc(i) = 0.6802*vwc_sfc(i) + 0.1068
-        vwc_sfc(i) = max( vwc_sfc(i), 0.1 )
-        vwc_sfc(i) = min( vwc_sfc(i), 0.43 )
-      end do
+c     Rescale soil moisture for dust emission via namelist coefficients.
+c     vwc_scale=1, vwc_offset=0 gives identity (no rescaling).
+c     Coefficients are tuned per-month against MODIS/VIIRS column AOD.
+c     Applied here (not in reader) so dry deposition of non-dust
+c     species uses the unmodified soil moisture.
+      if (vwc_scale .ne. 1.0 .or. vwc_offset .ne. 0.0) then
+        do i=1,plon
+          vwc_sfc(i) = vwc_scale*vwc_sfc(i) + vwc_offset
+          vwc_sfc(i) = max( vwc_sfc(i), 0.1 )
+          vwc_sfc(i) = min( vwc_sfc(i), 0.43 )
+        end do
+      end if
 c     Surface and soil temperature
       call tpt_gnd_soi_get(
      $     lat_idx,             ! I [idx] Latitude index
