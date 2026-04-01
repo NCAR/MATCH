@@ -92,3 +92,54 @@ Then launch the run script from `control/`:
 
     cd $MATCH/control
     ./run_<case>.sh > ~/Data/MATCH/2026/<case>.log 2>&1 &
+
+---
+
+## Migrating from CDAS to CORe meteorology
+
+NOAA CORe reanalysis can replace CDAS as the meteorological driver for MATCH.
+The model binary and ancillary data are unchanged; only the meteorological
+input configuration differs.
+
+### What changes
+
+| Item | CDAS | CORe |
+|------|------|------|
+| GRIB directory | `$HOME/Data/NCAR_A` (or similar) | `$HOME/Data/NCAR_A_CORe` |
+| List byte offset | Non-zero (multi-month archive files from GDEX) | `0` (one standalone file per month) |
+| GRIB filenames | `A20066-199801.grb2d` etc. | `A27340-202601.grb2d` etc. |
+| SOILW encoding | 9-bit, range 0.10-0.43, floor artifact at 0.10 | 18-bit, full range 0.02-1.0 |
+
+### Steps
+
+1. **Download CORe GRIB files** into a dedicated directory (e.g.
+   `$HOME/Data/NCAR_A_CORe`).  You need both `grb2d` (2-D surface fields)
+   and `grbsanl` (3-D sigma-level fields) for each month.
+
+2. **Create custom GRIB list files** in the run directory.  Use byte offset
+   `0` for all entries.  Include the month before and after the target period
+   for time interpolation at boundaries.  Example for a Feb 2026 run:
+
+   `grb2d.list`:
+   ```
+   A27340-202601.grb2d 0 202601010000
+   A27339-202602.grb2d 0 202602010000
+   A27338-202603.grb2d 0 202603010000
+   ```
+
+   `grbsanl.list`:
+   ```
+   A27329-202601.grbsanl 0 202601010000
+   A27328-202602.grbsanl 0 202602010000
+   A27327-202603.grbsanl 0 202603010000
+   ```
+
+3. **Update the run script** namelist:
+   - Set `RPTHDYN` and `LPTHDYN` to the CORe GRIB directory.
+   - Optionally set `vwc_scale` and `vwc_offset` to tune dust emission.
+     Without rescaling (defaults 1.0 and 0.0), CORe's finer soil moisture
+     resolution produces different dust AOD than CDAS.  Coefficients should
+     be tuned per month against satellite column AOD (MODIS/VIIRS).
+
+4. **Everything else stays the same**: binary, ancillary symlinks, restart
+   handling, output format.
