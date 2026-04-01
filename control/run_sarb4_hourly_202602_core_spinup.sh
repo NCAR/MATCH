@@ -72,7 +72,7 @@ histfrq=-1
 cat > namelist << END1
  &NLIST
  TITLE    = '$vers '
- DELT     = 1800
+ DELT     = 900
  RSTFLG   = $rst
  NESTEP   = $runtime
  NHTFRQ   = $histfrq

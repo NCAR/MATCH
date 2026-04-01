@@ -233,7 +233,7 @@ c     toward identity to account for spin-up amplification. Clamped
 c     to CDAS range. Applied here (not in reader) so dry deposition
 c     of non-dust species uses the unmodified soil moisture.
       do i=1,plon
-        vwc_sfc(i) = 0.7176*vwc_sfc(i) + 0.0943
+        vwc_sfc(i) = 0.6802*vwc_sfc(i) + 0.1068
         vwc_sfc(i) = max( vwc_sfc(i), 0.1 )
         vwc_sfc(i) = min( vwc_sfc(i), 0.43 )
       end do

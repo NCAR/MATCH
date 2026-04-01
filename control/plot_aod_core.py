@@ -136,7 +136,8 @@ def plot_diff_map(data, lats, lons, title, vmax_diff, output_dir, filename,
     fig = plt.figure(figsize=(12, 5), constrained_layout=True)
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
 
-    levels = np.arange(-vmax_diff, vmax_diff + 0.025, 0.05)
+    step = vmax_diff / (nlevels // 2)
+    levels = np.arange(-vmax_diff, vmax_diff + step / 2, step)
     cf = ax.contourf(lons_cyc, lats, data_cyc, levels=levels, cmap="RdBu_r",
                      extend="both", transform=ccrs.PlateCarree())
     cf.set_rasterized(True)
@@ -163,7 +164,7 @@ AOD_FIELDS = [
         "filename": "aod_total",
         "vmin": 0.0,
         "vmax": 0.7,
-        "vmax_diff": 0.3,
+        "vmax_diff": 1.0,
     },
     {
         "name": "Sulfate AOD",
@@ -171,7 +172,7 @@ AOD_FIELDS = [
         "filename": "aod_sulfate",
         "vmin": 0.0,
         "vmax": 0.3,
-        "vmax_diff": 0.1,
+        "vmax_diff": 0.5,
     },
     {
         "name": "Dust AOD",
@@ -179,7 +180,7 @@ AOD_FIELDS = [
         "filename": "aod_dust",
         "vmin": 0.0,
         "vmax": 0.8,
-        "vmax_diff": 0.3,
+        "vmax_diff": 1.0,
     },
     {
         "name": "Sea Salt AOD",
