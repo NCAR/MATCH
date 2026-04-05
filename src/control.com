@@ -93,8 +93,11 @@ c                   ! Default 1.0 (identity). Set per-month when tuning
 c                   ! against MODIS/VIIRS column AOD.
      $, vwc_offset  ! [m3 m-3] Soil moisture rescaling offset for dust emission
 c                   ! Default 0.0 (identity).
+     $, sslt_scale  ! [frc] Sea salt emission flux multiplier
+c                   ! Default 1.0 (no change). Set per-month when tuning
+c                   ! against MODIS/VIIRS column AOD over clean-ocean regions.
 
-      common /control2/ qrelax, vwc_scale, vwc_offset
+      common /control2/ qrelax, vwc_scale, vwc_offset, sslt_scale
 
 
 

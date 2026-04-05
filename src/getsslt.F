@@ -9,6 +9,7 @@ c     author: Phil RaschC     modified to remove all instances of tausslt   7/19
 
 #include <pmgrid.h>
 #include <ssltcom.h>
+#include <control.com>
 
       integer lat
       integer ioro(plond)
@@ -145,6 +146,14 @@ c++bee, convert sslt concentration from g/m3 --> kg/kg
          end do
       end do
 c--bee
+c     Apply namelist sea salt emission scaling factor.
+      if (sslt_scale .ne. 1.0) then
+         do k = 1,plev
+            do i = 1,plon
+               sslt(i,k) = sslt_scale * sslt(i,k)
+            end do
+         end do
+      end if
 C++   CTB
       
       do k = 1,plev
