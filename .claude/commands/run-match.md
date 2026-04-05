@@ -5,7 +5,8 @@ Ask the user for (or infer from context):
 2. **Met source** — CDAS or CORe (determines GRIB list handling)
 3. **Run period** — start date, number of days
 4. **Restart source** — path to an existing run to copy restart files from (optional)
-5. **vwc_scale / vwc_offset** — soil moisture rescaling coefficients (optional, defaults to identity)
+5. **vwc_scale / vwc_offset** — dust soil moisture rescaling coefficients (optional, defaults to identity)
+6. **sslt_scale** — sea salt emission multiplier (optional, default 1.0)
 
 Then follow these steps:
 

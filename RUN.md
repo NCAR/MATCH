@@ -62,8 +62,9 @@ Written by the run script into `<wrkdir>/namelist`.  Key variables:
 | `NESTEP` | int | Negative = total days; positive = timestep count |
 | `RSTFLG` | int | 0 = cold start, 1 = restart |
 | `RPTHDYN` / `LPTHDYN` | char | Path to met-data GRIB directory |
-| `vwc_scale` | real | Soil moisture rescaling slope (default 1.0 = identity) |
-| `vwc_offset` | real | Soil moisture rescaling offset (default 0.0) |
+| `vwc_scale` | real | Dust soil moisture rescaling slope (default 1.0 = identity) |
+| `vwc_offset` | real | Dust soil moisture rescaling offset (default 0.0) |
+| `sslt_scale` | real | Sea salt emission flux multiplier (default 1.0 = no change) |
 
 ### Quick checklist
 
@@ -138,8 +139,12 @@ input configuration differs.
    - Set `RPTHDYN` and `LPTHDYN` to the CORe GRIB directory.
    - Optionally set `vwc_scale` and `vwc_offset` to tune dust emission.
      Without rescaling (defaults 1.0 and 0.0), CORe's finer soil moisture
-     resolution produces different dust AOD than CDAS.  Coefficients should
-     be tuned per month against satellite column AOD (MODIS/VIIRS).
+     resolution produces different dust AOD than CDAS.
+   - Optionally set `sslt_scale` to tune sea salt emission (default 1.0).
+     CORe wind speeds differ from CDAS, producing a systematic sea salt
+     bias over oceans.
+   - Both sets of coefficients should be tuned per month against
+     assimilated AOD climatologies.  See `AOD_TUNE.md` for the plan.
 
 4. **Everything else stays the same**: binary, ancillary symlinks, restart
    handling, output format.

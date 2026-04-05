@@ -75,21 +75,16 @@ Compare tuned MATCH output against:
 
 ## Namelist Integration
 
-### Existing
+All three parameters are in the namelist with identity defaults:
 
 ```fortran
 vwc_scale  = 0.72    ! dust soil moisture rescaling slope (per month)
 vwc_offset = 0.09    ! dust soil moisture rescaling offset (per month)
+sslt_scale = 0.85    ! sea salt emission flux multiplier (per month)
 ```
 
-### Needed
-
-```fortran
-sslt_scale = 1.0     ! sea salt emission flux multiplier (per month)
-```
-
-`sslt_scale` needs to be added to the namelist and applied in the sea salt
-emission routine.  Default `1.0` = no change from current behavior.
+- `vwc_scale` / `vwc_offset` — applied in `dst/dstmbl.F` after `vwc_sfc_get()`
+- `sslt_scale` — applied in `src/getsslt.F` after concentration and unit conversion
 
 ## Output
 
