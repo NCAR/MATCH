@@ -103,8 +103,8 @@ Compare tuned MATCH output against:
 All parameters are in namelist `/nlist/` with identity defaults.  Example:
 
 ```fortran
-sslt_scale    = 1.2    ! sea salt emission flux multiplier (per month)
-dst_rgn_scale = 0.28, 0.40, 1.2, 4.0, 3.0, 1.0, 0.5
+sslt_scale    = 1.08   ! sea salt emission flux multiplier (per month)
+dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
                        ! Sahara, Arabia, C.Asia, Gobi, Australia, SW-NAm, Patagonia
 ! Legacy (superseded by dst_rgn_scale):
 ! vwc_scale  = 1.0     ! dust soil moisture rescaling slope
@@ -128,7 +128,7 @@ A table of 12 monthly coefficient sets.  Each row holds one
 |-------|--------|--------|--------|------|------|--------|-------|------|-------|
 | Jan   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
 | Feb   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Mar   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | in progress |
+| Mar   | 0.14 | 0.21 | 1.75 | 3.75 | 1.4 | 1.0 | 0.45 | 1.08 | tune5 — VIIRS 2025 |
 | Apr   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
 | May   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
 | Jun   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
@@ -138,3 +138,36 @@ A table of 12 monthly coefficient sets.  Each row holds one
 | Oct   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
 | Nov   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
 | Dec   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+
+## Evaluation — March 2026 (tune5 vs VIIRS Mar 2025)
+
+Full 41-day run (10-day Feb spin-up + 31-day March), CORe meteorology,
+compared against NOAA-20 VIIRS Ed1C `TOTEXTTAU` climatology.
+
+Regional AEROD (area-weighted box mean):
+
+| Region | Box (lat, lon) | Scale | TUNE5 | BASE | VIIRS | T5 − V |
+|--------|----------------|-------|-------|------|-------|--------|
+| Sahara/Sahel       | 10-30N, 20W-30E     | 0.14 | 0.41 | 2.03 | 0.38 | **+0.03** |
+| Arabia             | 15-30N, 30-55E      | 0.21 | 0.65 | 3.12 | 0.42 | **+0.23** ⚠ |
+| Central Asia       | 30-50N, 55-90E      | 1.75 | 0.24 | 0.41 | 0.25 | −0.01 |
+| Gobi/Taklamakan    | 35-50N, 90-115E     | 3.75 | 0.25 | 0.16 | 0.25 | 0.00 |
+| Australia          | 35-15S, 115-145E    | 1.4  | 0.12 | 0.09 | 0.11 | 0.00 |
+| SW N.America       | 25-40N, 115W-100W   | 1.0  | 0.03 | 0.03 | 0.09 | −0.06 (box) |
+| Patagonia          | 55-35S, 75W-60W     | 0.45 | 0.09 | 0.12 | 0.08 | 0.00 |
+| Southern Ocean     | 50-65S, all         | —    | 0.10 | 0.10 | 0.09 | +0.02 |
+| Central S.Pacific  | 30-50S, 150W-90W    | —    | 0.07 | 0.06 | 0.08 | −0.01 |
+| Remote S.Atlantic  | 30-50S, 30W-10E     | —    | 0.10 | 0.10 | 0.09 | +0.01 |
+
+**Global area-weighted mean:** TUNE5 = 0.122, BASE (identity) = 0.247, VIIRS = 0.157.
+
+Outstanding issues:
+- **Arabia** (+0.23 over): scale 0.21 still too large.  Nearby Sahara
+  transport may set an effective emission floor independent of local scale.
+- **SW N.America** (−0.06 under): baseline dust ≈ 0 in this box regardless
+  of scale; the box lies outside the Great Basin / Chihuahua Desert source
+  zones and should be relocated.
+- **Global under-bias** (−0.035): the 7 source boxes cover only a small
+  fraction of the globe; the tuneable knobs cannot raise AOD over
+  non-source continents and most of the tropical/mid-latitude oceans,
+  where VIIRS observes more AOD than MATCH produces.
