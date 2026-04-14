@@ -5,8 +5,12 @@
 Tune MATCH CORe aerosol emission parameters per calendar month against
 AOD climatologies from MATCH assimilation runs, targeting two species:
 
-- **Dust** — soil moisture rescaling (`vwc_scale`, `vwc_offset`)
-- **Sea salt** — emission flux scaling (`sslt_scale`, TBD)
+- **Dust** — per-region emission multiplier (`dst_rgn_scale`, 7 regions).
+  An older global rescale of soil moisture (`vwc_scale`, `vwc_offset`)
+  remains available but is superseded by the regional approach because
+  a single linear rescale cannot match multiple source regions
+  simultaneously.
+- **Sea salt** — emission flux scaling (`sslt_scale`)
 
 ## Problem
 
@@ -54,17 +58,38 @@ Candidate clean-ocean regions:
 - Central South Pacific: 30-50S, 150W-90W
 - Remote South Atlantic: 30-50S, 30W-10E
 
-### Step 3: Tune dust (dust-dominated regions)
+### Step 3: Tune dust per region
 
 With sea salt scaling fixed, run MATCH and compare `AEROD` against the
-climatology in dust-dominated regions to fit `vwc_scale` and `vwc_offset`
-per calendar month.
+climatology in each named dust source region.  Fit one multiplier per
+region per calendar month via `dst_rgn_scale(7)`.
 
-Dust-dominated regions:
-- Sahara/Sahel: 10-30N, 20W-30E
-- Atlantic dust corridor: 5-25N, 60W-20W
-- Arabian Peninsula: 15-30N, 35-60E
-- Gobi/Taklamakan: 35-45N, 75-110E
+Regions (boundaries hardcoded in `dst/dstmbl.F`):
+
+| Index | Region | Lat | Lon |
+|-------|--------|-----|-----|
+| 1 | Sahara/Sahel | 10-30N | 20W-30E |
+| 2 | Arabia | 15-30N | 30-55E |
+| 3 | Central Asia | 30-50N | 55-90E |
+| 4 | Gobi/Taklamakan | 35-50N | 90-115E |
+| 5 | Australia | 35-15S | 115-145E |
+| 6 | SW N.America | 25-40N | 115W-100W |
+| 7 | Patagonia | 55-35S | 75W-60W |
+
+Iteration heuristic: per region, compute a target dust AOD as
+`VIIRS_total - (baseline_AEROD - baseline_DST)`, i.e. VIIRS minus the
+local non-dust background.  Initial scale ≈ `target_dust / baseline_dust`.
+Short 10-day runs (5-day Feb spin-up + 5-day March sample) suffice for
+iteration; dust lifetime (~1–5 d) is short relative to the sample.
+
+Caveat: regions where baseline emission is near zero (e.g. SW N.America
+with box as defined) have no leverage via a multiplier — the box would
+need relocation to actual source zones.
+
+The older global approach (`vwc_scale`, `vwc_offset`) remains wired in
+for backwards compatibility but is superseded: a single linear rescale
+cannot simultaneously suppress hyperarid Sahara/Arabia emission and
+preserve moderate Gobi/Australia emission.
 
 ### Step 4: Validate
 
@@ -75,32 +100,41 @@ Compare tuned MATCH output against:
 
 ## Namelist Integration
 
-All three parameters are in the namelist with identity defaults:
+All parameters are in namelist `/nlist/` with identity defaults.  Example:
 
 ```fortran
-vwc_scale  = 0.72    ! dust soil moisture rescaling slope (per month)
-vwc_offset = 0.09    ! dust soil moisture rescaling offset (per month)
-sslt_scale = 0.85    ! sea salt emission flux multiplier (per month)
+sslt_scale    = 1.2    ! sea salt emission flux multiplier (per month)
+dst_rgn_scale = 0.28, 0.40, 1.2, 4.0, 3.0, 1.0, 0.5
+                       ! Sahara, Arabia, C.Asia, Gobi, Australia, SW-NAm, Patagonia
+! Legacy (superseded by dst_rgn_scale):
+! vwc_scale  = 1.0     ! dust soil moisture rescaling slope
+! vwc_offset = 0.0     ! dust soil moisture rescaling offset
 ```
 
-- `vwc_scale` / `vwc_offset` — applied in `dst/dstmbl.F` after `vwc_sfc_get()`
-- `sslt_scale` — applied in `src/getsslt.F` after concentration and unit conversion
+- `dst_rgn_scale` — applied in `dst/dstmbl.F` to `flx_mss_hrz_slt_ttl`
+  alongside `lnd_frc_mbl` and `flx_mss_fdg_fct`, per-gridpoint based on
+  hardcoded region boxes.
+- `vwc_scale` / `vwc_offset` — applied in `dst/dstmbl.F` after
+  `vwc_sfc_get()`, clamped to `[0.10, 0.43]` when engaged.
+- `sslt_scale` — applied in `src/getsslt.F` after concentration and unit
+  conversion.
 
 ## Output
 
-A table of 12 monthly coefficient sets:
+A table of 12 monthly coefficient sets.  Each row holds one
+`dst_rgn_scale` array (7 values) plus `sslt_scale`:
 
-| Month | vwc_scale | vwc_offset | sslt_scale | Notes |
-|-------|-----------|------------|------------|-------|
-| Jan   | TBD | TBD | TBD | |
-| Feb   | TBD | TBD | TBD | |
-| Mar   | TBD | TBD | TBD | |
-| Apr   | TBD | TBD | TBD | |
-| May   | TBD | TBD | TBD | |
-| Jun   | TBD | TBD | TBD | |
-| Jul   | TBD | TBD | TBD | |
-| Aug   | TBD | TBD | TBD | |
-| Sep   | TBD | TBD | TBD | |
-| Oct   | TBD | TBD | TBD | |
-| Nov   | TBD | TBD | TBD | |
-| Dec   | TBD | TBD | TBD | |
+| Month | Sahara | Arabia | C.Asia | Gobi | Aust | SW-NAm | Patag | sslt | Notes |
+|-------|--------|--------|--------|------|------|--------|-------|------|-------|
+| Jan   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Feb   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Mar   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | in progress |
+| Apr   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| May   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jun   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jul   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Aug   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Sep   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Oct   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Nov   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Dec   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |

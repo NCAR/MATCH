@@ -163,6 +163,9 @@ c     Local
 c     GCM diagnostics
       real(r8) q_dst_tnd_mbl(plond,dst_nbr) ! [kg kg-1 s-1] Dust tendency due to gravitational settling
       real(r8) q_dst_tnd_mbl_ttl(plond) ! [kg kg-1 s-1] Total dust tendency due to gravitational settling
+c     Per-gridpoint dust tuning region index (0 = no region; see control.com).
+      integer rgn_id(plond)
+      real(r8) lat_deg, lon_deg, rgn_scale
       
 c     Main Code
 c     Timesplit if desired
@@ -398,14 +401,48 @@ c     Horizontal streamwise mass flux
      $     wnd_frc_slt,         ! I [m s-1] Saltating friction velocity
      $     wnd_frc_thr_slt)     ! I [m s-1] Threshold friction speed for saltation
       
-c     Apply land surface and vegetation limitations and global tuning factor
+c     Determine per-gridpoint dust tuning region (0 = no region => scale 1).
+      lat_deg = lat_rdn * 57.29577951308232
       do i=1,plon
+         lon_deg = (i-1) * 360.0 / plon
+         if (lat_deg .ge. 10.0 .and. lat_deg .le. 30.0 .and.
+     $       (lon_deg .ge. 340.0 .or. lon_deg .le. 30.0)) then
+            rgn_id(i) = 1       ! Sahara/Sahel
+         else if (lat_deg .ge. 15.0 .and. lat_deg .le. 30.0 .and.
+     $            lon_deg .ge. 30.0 .and. lon_deg .le. 55.0) then
+            rgn_id(i) = 2       ! Arabia
+         else if (lat_deg .ge. 30.0 .and. lat_deg .le. 50.0 .and.
+     $            lon_deg .ge. 55.0 .and. lon_deg .le. 90.0) then
+            rgn_id(i) = 3       ! Central Asia
+         else if (lat_deg .ge. 35.0 .and. lat_deg .le. 50.0 .and.
+     $            lon_deg .ge. 90.0 .and. lon_deg .le. 115.0) then
+            rgn_id(i) = 4       ! Gobi/Taklamakan
+         else if (lat_deg .ge. -35.0 .and. lat_deg .le. -15.0 .and.
+     $            lon_deg .ge. 115.0 .and. lon_deg .le. 145.0) then
+            rgn_id(i) = 5       ! Australia
+         else if (lat_deg .ge. 25.0 .and. lat_deg .le. 40.0 .and.
+     $            lon_deg .ge. 245.0 .and. lon_deg .le. 260.0) then
+            rgn_id(i) = 6       ! SW North America
+         else if (lat_deg .ge. -55.0 .and. lat_deg .le. -35.0 .and.
+     $            lon_deg .ge. 285.0 .and. lon_deg .le. 300.0) then
+            rgn_id(i) = 7       ! Patagonia
+         else
+            rgn_id(i) = 0
+         endif
+      end do
+
+c     Apply land surface and vegetation limitations, global tuning factor,
+c     and per-region dust tuning multiplier (dst_rgn_scale, see control.com).
+      do i=1,plon
+         rgn_scale = 1.0
+         if (rgn_id(i) > 0) rgn_scale = dst_rgn_scale(rgn_id(i))
          flx_mss_hrz_slt_ttl(i)=flx_mss_hrz_slt_ttl(i) ! [kg m-2 s-1]
      $        *lnd_frc_mbl(i)   ! [frc] Bare ground fraction
 c++pjr nats mods for ginoux basins
 c     $        *mbl_bsn_fct(i)   ! [frc] Topographic source limitation
 c--pjr
      $        *flx_mss_fdg_fct  ! [frc] Global mass flux tuning factor (empirical)
+     $        *rgn_scale        ! [frc] Per-region tuning multiplier
 c++mahow
 !     &        *1.72          ! tuning tot source to 1500 mt/yr
 c++pjr nats mods for ginoux basins

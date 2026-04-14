@@ -96,8 +96,19 @@ c                   ! Default 0.0 (identity).
      $, sslt_scale  ! [frc] Sea salt emission flux multiplier
 c                   ! Default 1.0 (no change). Set per-month when tuning
 c                   ! against MODIS/VIIRS column AOD over clean-ocean regions.
+     $, dst_rgn_scale(7) ! [frc] Per-region dust emission multiplier.
+c                   ! Regions (lat/lon bounds in dstmbl.F):
+c                   !   1 = Sahara/Sahel   (10-30N,  20W-30E)
+c                   !   2 = Arabia         (15-30N,  30-55E)
+c                   !   3 = Central Asia   (30-50N,  55-90E)
+c                   !   4 = Gobi/Taklamakan(35-50N,  90-115E)
+c                   !   5 = Australia      (35-15S, 115-145E)
+c                   !   6 = SW N.America   (25-40N, 115W-100W)
+c                   !   7 = Patagonia      (55-35S,  75W-60W)
+c                   ! Default 1.0 (no per-region change).
 
       common /control2/ qrelax, vwc_scale, vwc_offset, sslt_scale
+     $, dst_rgn_scale
 
 
 

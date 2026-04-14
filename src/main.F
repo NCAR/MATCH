@@ -738,6 +738,7 @@ c--assim
      $, tvbnd, dowetdep, rdoro, rdomega, addqrad, globmass
      $, dodrydep, readQIC, useAltConv, wind_ps_adj, calcedot
      $, vwc_scale, vwc_offset, sslt_scale
+     $, dst_rgn_scale
      $, lpthncsf, ncsfvar
      $, unm, vnm, psnm, oronm, phisnm, etadotnm, omeganm, tnm, qnm, tsnm
      $, tauxnm, tauynm, shflxnm, qflxnm, kvhnm, cgsnm, zmunm, zmdnm
@@ -882,6 +883,7 @@ c     Initialize control variables.
       vwc_scale  = 1.0
       vwc_offset = 0.0
       sslt_scale = 1.0
+      dst_rgn_scale = 1.0
       divdiff = .false.
       arvdiff = .false.
       diconvccm = .false.

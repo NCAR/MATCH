@@ -65,6 +65,36 @@ Written by the run script into `<wrkdir>/namelist`.  Key variables:
 | `vwc_scale` | real | Dust soil moisture rescaling slope (default 1.0 = identity) |
 | `vwc_offset` | real | Dust soil moisture rescaling offset (default 0.0) |
 | `sslt_scale` | real | Sea salt emission flux multiplier (default 1.0 = no change) |
+| `dst_rgn_scale(7)` | real array | Per-region dust emission multiplier (default 1.0 each). See below. |
+
+#### Regional dust tuning (`dst_rgn_scale`)
+
+A 7-element array that multiplies the horizontal saltation flux in
+`dst/dstmbl.F` at each gridpoint, based on which named region the point
+falls in. Gridpoints outside all regions use scale 1.0. The region boxes
+are hardcoded in `dstmbl.F`:
+
+| Index | Region | Lat bounds | Lon bounds |
+|-------|--------|-----------|------------|
+| 1 | Sahara/Sahel | 10N–30N | 20W–30E |
+| 2 | Arabia | 15N–30N | 30E–55E |
+| 3 | Central Asia | 30N–50N | 55E–90E |
+| 4 | Gobi/Taklamakan | 35N–50N | 90E–115E |
+| 5 | Australia | 35S–15S | 115E–145E |
+| 6 | SW N.America | 25N–40N | 115W–100W |
+| 7 | Patagonia | 55S–35S | 75W–60W |
+
+Example:
+```fortran
+dst_rgn_scale = 0.28, 0.40, 1.2, 4.0, 3.0, 1.0, 0.5
+```
+
+Use when the global `vwc_scale`/`vwc_offset` rescale cannot match AOD
+in multiple source regions simultaneously — Sahara/Arabia need strong
+suppression (CORe SOILW ≈ 0.02 → max emission) while Gobi/Australia
+are under-emitting. The scalar-per-region approach decouples these and
+is easier to iterate against satellite climatologies than the
+soil-moisture rescale.
 
 ### Quick checklist
 
@@ -137,14 +167,19 @@ input configuration differs.
 
 3. **Update the run script** namelist:
    - Set `RPTHDYN` and `LPTHDYN` to the CORe GRIB directory.
-   - Optionally set `vwc_scale` and `vwc_offset` to tune dust emission.
+   - Optionally set `vwc_scale` and `vwc_offset` to tune dust emission
+     globally via a linear rescale of the volumetric water content.
      Without rescaling (defaults 1.0 and 0.0), CORe's finer soil moisture
      resolution produces different dust AOD than CDAS.
+   - Optionally set `dst_rgn_scale` (7-element array) to tune dust
+     emission per named source region (Sahara, Arabia, C.Asia, Gobi,
+     Australia, SW N.America, Patagonia) — more controllable than
+     `vwc_scale`/`vwc_offset` when regional biases differ in sign.
    - Optionally set `sslt_scale` to tune sea salt emission (default 1.0).
      CORe wind speeds differ from CDAS, producing a systematic sea salt
      bias over oceans.
-   - Both sets of coefficients should be tuned per month against
-     assimilated AOD climatologies.  See `AOD_TUNE.md` for the plan.
+   - Coefficients should be tuned per month against assimilated AOD
+     climatologies.  See `AOD_TUNE.md` for the plan.
 
 4. **Everything else stays the same**: binary, ancillary symlinks, restart
    handling, output format.
