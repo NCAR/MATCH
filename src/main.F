@@ -738,7 +738,7 @@ c--assim
      $, tvbnd, dowetdep, rdoro, rdomega, addqrad, globmass
      $, dodrydep, readQIC, useAltConv, wind_ps_adj, calcedot
      $, vwc_scale, vwc_offset, sslt_scale
-     $, dst_rgn_scale
+     $, dst_rgn_scale, n_sslt_bands, sslt_bands
      $, lpthncsf, ncsfvar
      $, unm, vnm, psnm, oronm, phisnm, etadotnm, omeganm, tnm, qnm, tsnm
      $, tauxnm, tauynm, shflxnm, qflxnm, kvhnm, cgsnm, zmunm, zmdnm
@@ -884,6 +884,8 @@ c     Initialize control variables.
       vwc_offset = 0.0
       sslt_scale = 1.0
       dst_rgn_scale = 1.0
+      n_sslt_bands = 0
+      sslt_bands = 0.0
       divdiff = .false.
       arvdiff = .false.
       diconvccm = .false.
@@ -1107,6 +1109,45 @@ c     Get environment variables for CASE and LOGNAME
          write(*,*)'        restrart files.  Use namelist variables'
          write(*,*)'        RPTHRST0/RPTHRST1 or RROOTD'
          inerror = inerror + 1
+      end if
+
+c     Validate sea salt regional tuning bands.
+      if ( n_sslt_bands .lt. 0 .or.
+     $     n_sslt_bands .gt. max_sslt_bands ) then
+         write(*,*)'inirun: n_sslt_bands out of range [0,',
+     $             max_sslt_bands,']: ', n_sslt_bands
+         inerror = inerror + 1
+      else
+         do i = 1, n_sslt_bands
+            if ( sslt_bands(1,i) .lt. -90.0 .or.
+     $           sslt_bands(1,i) .gt.  90.0 .or.
+     $           sslt_bands(2,i) .lt. -90.0 .or.
+     $           sslt_bands(2,i) .gt.  90.0 ) then
+               write(*,*)'inirun: sslt_bands(:,',i,
+     $                   ') latitude out of [-90,90]: ',
+     $                   sslt_bands(1,i), sslt_bands(2,i)
+               inerror = inerror + 1
+            end if
+            if ( sslt_bands(1,i) .ge. sslt_bands(2,i) ) then
+               write(*,*)'inirun: sslt_bands(:,',i,
+     $                   ') requires lat_min < lat_max, got ',
+     $                   sslt_bands(1,i), sslt_bands(2,i)
+               inerror = inerror + 1
+            end if
+         end do
+         do i = 1, n_sslt_bands - 1
+            do j = i + 1, n_sslt_bands
+               if ( max(sslt_bands(1,i), sslt_bands(1,j)) .lt.
+     $              min(sslt_bands(2,i), sslt_bands(2,j)) ) then
+                  write(*,*)'inirun: sslt_bands ',i,' and ',j,
+     $                      ' overlap: [',
+     $                      sslt_bands(1,i),',',sslt_bands(2,i),
+     $                      '] vs [',
+     $                      sslt_bands(1,j),',',sslt_bands(2,j),']'
+                  inerror = inerror + 1
+               end if
+            end do
+         end do
       end if
 
 c     Exit if input error(s) found.

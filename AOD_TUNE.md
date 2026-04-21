@@ -10,7 +10,10 @@ AOD climatologies from MATCH assimilation runs, targeting two species:
   remains available but is superseded by the regional approach because
   a single linear rescale cannot match multiple source regions
   simultaneously.
-- **Sea salt** — emission flux scaling (`sslt_scale`)
+- **Sea salt** — global emission flux multiplier (`sslt_scale`) plus
+  optional per-latitude-band tuning (`sslt_bands`, `n_sslt_bands`) to
+  address N/S asymmetry in wind-driven emission (strong Southern Ocean
+  bias is the largest signal against MODIS/VIIRS).
 
 ## Problem
 
@@ -51,7 +54,14 @@ provides the longer baseline; VIIRS serves as an independent check.
 Over remote ocean regions far from dust, pollution, and biomass burning
 (Southern Ocean, central South Pacific, etc.), total AOD is dominated by
 sea salt.  Compare free-running MATCH `AEROD` against the climatology in
-these clean-ocean boxes to fit `sslt_scale` per calendar month.
+these clean-ocean boxes to fit the sea salt scaling per calendar month.
+
+Two knobs are available and compose multiplicatively:
+- `sslt_scale` — a single global multiplier.
+- `sslt_bands` + `n_sslt_bands` — per-latitude-band multipliers.  Each
+  active band is a `(lat_min_deg, lat_max_deg, scale)` triple.  Useful
+  when the bias has N/S asymmetry (typical: Southern Ocean stronger
+  than Northern).
 
 Candidate clean-ocean regions:
 - Southern Ocean: 50-65S, all longitudes
@@ -103,7 +113,11 @@ Compare tuned MATCH output against:
 All parameters are in namelist `/nlist/` with identity defaults.  Example:
 
 ```fortran
-sslt_scale    = 1.08   ! sea salt emission flux multiplier (per month)
+sslt_scale    = 1.08   ! global sea salt multiplier (per month)
+n_sslt_bands  = 3      ! N active latitude bands below (0 disables)
+sslt_bands    = -90., -45., 1.15,  ! Southern Ocean
+                -45.,  45., 1.00,  ! mid-latitudes
+                 45.,  90., 0.95   ! Northern Ocean
 dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
                        ! Sahara, Arabia, C.Asia, Gobi, Australia, SW-NAm, Patagonia
 ! Legacy (superseded by dst_rgn_scale):
@@ -116,8 +130,10 @@ dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
   hardcoded region boxes.
 - `vwc_scale` / `vwc_offset` — applied in `dst/dstmbl.F` after
   `vwc_sfc_get()`, clamped to `[0.10, 0.43]` when engaged.
-- `sslt_scale` — applied in `src/getsslt.F` after concentration and unit
-  conversion.
+- `sslt_scale` and `sslt_bands` — applied in `src/getsslt.F` after
+  concentration and unit conversion; band lookup uses the row latitude
+  in radians passed down from `src/physlic.F`.  Validation runs at
+  startup in `src/main.F` (latitude range, lat_min<lat_max, no overlap).
 
 ## Output
 

@@ -1,5 +1,5 @@
 #include <params.h>
-      subroutine getsslt (lat, ioro, u10, zm, zi, rpdel, sslt)
+      subroutine getsslt (lat, rlat, ioro, u10, zm, zi, rpdel, sslt)
 
 c     compute the sea salt optical depth, give the 10m wind speed
 c     author: Phil RaschC     modified to remove all instances of tausslt   7/19/00
@@ -12,6 +12,7 @@ c     author: Phil RaschC     modified to remove all instances of tausslt   7/19
 #include <control.com>
 
       integer lat
+      real(r8) rlat             ! [rdn] latitude of this row
       integer ioro(plond)
       real(r8) u10(plond)
       real(r8) zm(plond,plev)
@@ -39,6 +40,11 @@ c     author: Phil RaschC     modified to remove all instances of tausslt   7/19
       real(r8) :: gravit = 9.80616
 
       real(r8) :: one = 1.0
+
+      real(r8) lat_deg          ! latitude in degrees
+      real(r8) rgn_scale        ! per-band multiplier (1.0 outside all bands)
+      real(r8) tot_scale        ! global * regional composed multiplier
+      integer ib
 
       ii = 1
       do i = 1,plon
@@ -146,11 +152,24 @@ c++bee, convert sslt concentration from g/m3 --> kg/kg
          end do
       end do
 c--bee
-c     Apply namelist sea salt emission scaling factor.
-      if (sslt_scale .ne. 1.0) then
+c     Apply namelist sea salt scaling: global sslt_scale * per-latitude-band
+c     factor from sslt_bands (if any band covers this row's latitude).
+      rgn_scale = 1.0
+      if (n_sslt_bands > 0) then
+         lat_deg = rlat * 57.29577951308232_r8
+         do ib = 1, n_sslt_bands
+            if (lat_deg .ge. sslt_bands(1,ib) .and.
+     $          lat_deg .le. sslt_bands(2,ib)) then
+               rgn_scale = sslt_bands(3,ib)
+               exit
+            end if
+         end do
+      end if
+      tot_scale = sslt_scale * rgn_scale
+      if (tot_scale .ne. 1.0) then
          do k = 1,plev
             do i = 1,plon
-               sslt(i,k) = sslt_scale * sslt(i,k)
+               sslt(i,k) = tot_scale * sslt(i,k)
             end do
          end do
       end if

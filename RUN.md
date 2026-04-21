@@ -64,7 +64,9 @@ Written by the run script into `<wrkdir>/namelist`.  Key variables:
 | `RPTHDYN` / `LPTHDYN` | char | Path to met-data GRIB directory |
 | `vwc_scale` | real | Dust soil moisture rescaling slope (default 1.0 = identity) |
 | `vwc_offset` | real | Dust soil moisture rescaling offset (default 0.0) |
-| `sslt_scale` | real | Sea salt emission flux multiplier (default 1.0 = no change) |
+| `sslt_scale` | real | Global sea salt emission multiplier (default 1.0 = no change) |
+| `n_sslt_bands` | int | Number of active sea salt latitude bands (0 disables). See below. |
+| `sslt_bands(3,10)` | real array | Per-band sea salt tuning: `(lat_min, lat_max, scale)` triples. See below. |
 | `dst_rgn_scale(7)` | real array | Per-region dust emission multiplier (default 1.0 each). See below. |
 
 #### Regional dust tuning (`dst_rgn_scale`)
@@ -95,6 +97,29 @@ suppression (CORe SOILW ≈ 0.02 → max emission) while Gobi/Australia
 are under-emitting. The scalar-per-region approach decouples these and
 is easier to iterate against satellite climatologies than the
 soil-moisture rescale.
+
+#### Regional sea salt tuning (`sslt_bands`, `n_sslt_bands`)
+
+User-defined latitude bands, each with its own multiplier, applied in
+`src/getsslt.F`.  `sslt_bands` is a `(3, max_sslt_bands=10)` array.  Column
+`ib` is the triple `(lat_min_deg, lat_max_deg, scale)`.  Only the first
+`n_sslt_bands` columns are read; the rest are ignored.  Columns whose
+latitude lies in `[lat_min, lat_max]` are multiplied by `scale` (first
+matching band wins).  `sslt_scale` is applied multiplicatively on top of
+the band scale (or alone, when `n_sslt_bands = 0`).
+
+Validation at startup (run aborts if any fail):
+- `0 <= n_sslt_bands <= 10`
+- each band has `-90 <= lat_min < lat_max <= 90`
+- no two bands overlap (touching at the boundary is allowed)
+
+Example — three bands split at ±45°:
+```fortran
+n_sslt_bands = 3
+sslt_bands   = -90., -45., 1.15,
+               -45.,  45., 1.00,
+                45.,  90., 0.95
+```
 
 ### Quick checklist
 
@@ -175,9 +200,11 @@ input configuration differs.
      emission per named source region (Sahara, Arabia, C.Asia, Gobi,
      Australia, SW N.America, Patagonia) — more controllable than
      `vwc_scale`/`vwc_offset` when regional biases differ in sign.
-   - Optionally set `sslt_scale` to tune sea salt emission (default 1.0).
-     CORe wind speeds differ from CDAS, producing a systematic sea salt
-     bias over oceans.
+   - Optionally set `sslt_scale` for a global sea salt emission multiplier,
+     and/or `sslt_bands` + `n_sslt_bands` for per-latitude-band scaling
+     (e.g. a stronger multiplier over the Southern Ocean where winds and
+     sea-salt AOD are highest).  See the regional sea salt tuning section
+     above.
    - Coefficients should be tuned per month against assimilated AOD
      climatologies.  See `AOD_TUNE.md` for the plan.
 

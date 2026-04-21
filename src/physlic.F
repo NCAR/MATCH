@@ -917,7 +917,7 @@ c     calculate the 10m wind over the ocean
 
 c     calculate the optical depth of a sea salt aerosol over the ocean
 c+drb  changes made to fit WDC 8/31/2K changes
-      call getsslt (lat, ioro, u10, zm, zi, rpdel, sslt)
+      call getsslt (lat, clat(lat), ioro, u10, zm, zi, rpdel, sslt)
       call outfld('SSLT',       sslt, plond, lat, obuf )
 
 !WDC 8/31/2K -- computed later using optDep routines

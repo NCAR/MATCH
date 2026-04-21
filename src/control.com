@@ -80,6 +80,10 @@ c     time index N-1 to time index N.
      $, icday, icdaysec, icdate, icdatesec, mpdate, mpdatesec
      $, curday, curdaysec, curdate, curdatesec, basedate, basedatesec
 
+c     Sea salt regional tuning: compile-time limit on number of bands.
+      integer max_sslt_bands
+      parameter (max_sslt_bands = 10)
+
 c     Updating advected Q and potential temperature.
       real(r8)
      $  qrelax      ! Relaxation factor for "nudging" predicted Q field
@@ -93,9 +97,9 @@ c                   ! Default 1.0 (identity). Set per-month when tuning
 c                   ! against MODIS/VIIRS column AOD.
      $, vwc_offset  ! [m3 m-3] Soil moisture rescaling offset for dust emission
 c                   ! Default 0.0 (identity).
-     $, sslt_scale  ! [frc] Sea salt emission flux multiplier
-c                   ! Default 1.0 (no change). Set per-month when tuning
-c                   ! against MODIS/VIIRS column AOD over clean-ocean regions.
+     $, sslt_scale  ! [frc] Sea salt emission flux global flux multiplier
+c                   ! Default 1.0 (no change). Composes multiplicatively with
+c                   ! any per-band scaling in sslt_bands.
      $, dst_rgn_scale(7) ! [frc] Per-region dust emission multiplier.
 c                   ! Regions (lat/lon bounds in dstmbl.F):
 c                   !   1 = Sahara/Sahel   (10-30N,  20W-30E)
@@ -106,9 +110,25 @@ c                   !   5 = Australia      (35-15S, 115-145E)
 c                   !   6 = SW N.America   (25-40N, 115W-100W)
 c                   !   7 = Patagonia      (55-35S,  75W-60W)
 c                   ! Default 1.0 (no per-region change).
+     $, sslt_bands(3, max_sslt_bands) ! Sea salt regional tuning bands.
+c                   ! Each active column (ib = 1..n_sslt_bands) is a triple
+c                   !   (lat_min_deg, lat_max_deg, scale).
+c                   ! Applied in src/getsslt.F: a column with latitude in
+c                   ! [lat_min, lat_max] gets its sslt multiplied by scale
+c                   ! (and by sslt_scale globally). Columns outside every
+c                   ! band get scale 1.0. Bands are validated at startup in
+c                   ! main.F — latitudes must lie in [-90, 90], lat_min must
+c                   ! be strictly less than lat_max, and bands must not
+c                   ! overlap (touching at the boundary is allowed).
+c                   ! Default 0.0 for all entries (inactive until
+c                   ! n_sslt_bands > 0 and entries populated).
+      integer
+     $  n_sslt_bands ! Number of active entries in sslt_bands, 0..max_sslt_bands.
+c                    ! Default 0 disables regional scaling.
 
       common /control2/ qrelax, vwc_scale, vwc_offset, sslt_scale
-     $, dst_rgn_scale
+     $, dst_rgn_scale, sslt_bands
+      common /control3/ n_sslt_bands
 
 
 

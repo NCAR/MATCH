@@ -6,7 +6,8 @@ Ask the user for (or infer from context):
 3. **Run period** — start date, number of days
 4. **Restart source** — path to an existing run to copy restart files from (optional)
 5. **vwc_scale / vwc_offset** — dust soil moisture rescaling coefficients (optional, defaults to identity)
-6. **sslt_scale** — sea salt emission multiplier (optional, default 1.0)
+6. **sslt_scale** — global sea salt emission multiplier (optional, default 1.0)
+7. **sslt_bands / n_sslt_bands** — optional per-latitude-band sea salt multipliers, `(lat_min, lat_max, scale)` triples (see RUN.md)
 
 Then follow these steps:
 
