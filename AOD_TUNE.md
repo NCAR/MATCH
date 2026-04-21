@@ -137,23 +137,47 @@ dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
 
 ## Output
 
-A table of 12 monthly coefficient sets.  Each row holds one
-`dst_rgn_scale` array (7 values) plus `sslt_scale`:
+Two tables per calendar month: dust regional coefficients and sea salt
+coefficients.  Sea salt has a single global multiplier (`sslt_scale`) and
+an optional set of latitude bands (`sslt_bands`); use "—" in the bands
+column when no bands are active.
 
-| Month | Sahara | Arabia | C.Asia | Gobi | Aust | SW-NAm | Patag | sslt | Notes |
-|-------|--------|--------|--------|------|------|--------|-------|------|-------|
-| Jan   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Feb   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Mar   | 0.14 | 0.21 | 1.75 | 3.75 | 1.4 | 1.0 | 0.45 | 1.08 | tune5 — VIIRS 2025 |
-| Apr   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| May   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Jun   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Jul   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Aug   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Sep   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Oct   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Nov   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
-| Dec   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+### Dust (`dst_rgn_scale`, 7 regions)
+
+| Month | Sahara | Arabia | C.Asia | Gobi | Aust | SW-NAm | Patag | Notes |
+|-------|--------|--------|--------|------|------|--------|-------|-------|
+| Jan   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Feb   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Mar   | 0.14 | 0.21 | 1.75 | 3.75 | 1.4 | 1.0 | 0.45 | tune5 — VIIRS 2025 |
+| Apr   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| May   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jun   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jul   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Aug   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Sep   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Oct   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Nov   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Dec   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+
+### Sea salt (`sslt_scale` + `sslt_bands`)
+
+`sslt_bands` column lists active `(lat_min, lat_max, scale)` triples, or
+"—" when `n_sslt_bands = 0` (global `sslt_scale` only).
+
+| Month | sslt_scale | sslt_bands | Notes |
+|-------|------------|------------|-------|
+| Jan   | TBD  | TBD | |
+| Feb   | TBD  | TBD | |
+| Mar   | 1.08 | —   | tune5 — VIIRS 2025 (pre-bands) |
+| Apr   | TBD  | TBD | |
+| May   | TBD  | TBD | |
+| Jun   | TBD  | TBD | |
+| Jul   | TBD  | TBD | |
+| Aug   | TBD  | TBD | |
+| Sep   | TBD  | TBD | |
+| Oct   | TBD  | TBD | |
+| Nov   | TBD  | TBD | |
+| Dec   | TBD  | TBD | |
 
 ## Evaluation — March 2026 (tune5 vs VIIRS Mar 2025)
 
