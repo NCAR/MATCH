@@ -5,9 +5,13 @@ Ask the user for (or infer from context):
 2. **Met source** — CDAS or CORe (determines GRIB list handling)
 3. **Run period** — start date, number of days
 4. **Restart source** — path to an existing run to copy restart files from (optional)
-5. **vwc_scale / vwc_offset** — dust soil moisture rescaling coefficients (optional, defaults to identity)
-6. **sslt_scale** — global sea salt emission multiplier (optional, default 1.0)
-7. **sslt_bands / n_sslt_bands** — optional per-latitude-band sea salt multipliers, `(lat_min, lat_max, scale)` triples (see RUN.md)
+5. **vwc_scale / vwc_offset** — dust soil moisture rescaling coefficients (optional, default identity; superseded by dst_rgn_scale)
+6. **dst_rgn_scale(7)** — per-region dust emission multiplier (optional, default 1.0 each; regions: Sahara, Arabia, C.Asia, Gobi, Aust, SW-NAm, Patagonia)
+7. **sslt_scale** — global sea salt emission multiplier (optional, default 1.0)
+8. **sslt_bands / n_sslt_bands** — optional per-latitude-band sea salt multipliers, `(lat_min, lat_max, scale)` triples (see RUN.md)
+9. **so2_rgn_scale(4)** — per-region SOx emission multiplier (optional; regions: E.Asia, S.Asia, Europe, N.Am)
+10. **dms_rgn_scale(6)** — per-basin DMS emission multiplier (optional; basins: N.Pac, S.Pac, N.Atl, S.Atl, Indian, Southern)
+11. **oc_rgn_scale(9) / bc_rgn_scale(9)** — per-region organic / black carbon emission multipliers (optional; same 9 regions: Amazon, S.Africa, SE.Asia, Aust, E.Asia, S.Asia, Europe, N.Am, Boreal)
 
 Then follow these steps:
 

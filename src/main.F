@@ -739,6 +739,7 @@ c--assim
      $, dodrydep, readQIC, useAltConv, wind_ps_adj, calcedot
      $, vwc_scale, vwc_offset, sslt_scale
      $, dst_rgn_scale, n_sslt_bands, sslt_bands
+     $, so2_rgn_scale, dms_rgn_scale, oc_rgn_scale, bc_rgn_scale
      $, lpthncsf, ncsfvar
      $, unm, vnm, psnm, oronm, phisnm, etadotnm, omeganm, tnm, qnm, tsnm
      $, tauxnm, tauynm, shflxnm, qflxnm, kvhnm, cgsnm, zmunm, zmdnm
@@ -886,6 +887,10 @@ c     Initialize control variables.
       dst_rgn_scale = 1.0
       n_sslt_bands = 0
       sslt_bands = 0.0
+      so2_rgn_scale = 1.0
+      dms_rgn_scale = 1.0
+      oc_rgn_scale = 1.0
+      bc_rgn_scale = 1.0
       divdiff = .false.
       arvdiff = .false.
       diconvccm = .false.

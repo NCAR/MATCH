@@ -78,6 +78,27 @@ Precision is controlled separately via `usrCPP_DEFS_PRC`:
 - `getsslt.F` — Sea salt aerosol
 - `optDepth.F` — Aerosol optical depth computation
 
+### Emission Tuning
+
+Aerosol emissions can be scaled per source region or latitude band via
+namelist parameters declared in `src/control.com` and read in `main.F`.
+All defaults are 1.0 (identity) so unconfigured runs are unchanged.
+
+| Species | Knob(s) | Applied in | Region count |
+|---------|---------|------------|--------------|
+| Dust    | `dst_rgn_scale`, `vwc_scale`/`vwc_offset` (legacy) | `dst/dstmbl.F` | 7 source regions |
+| Sea salt | `sslt_scale` (global), `sslt_bands`/`n_sslt_bands` (latitude bands) | `src/getsslt.F` | up to 10 user-defined bands |
+| Sulfate (SOx) | `so2_rgn_scale` | `src_scyc/sulemis.F90` | 4 anthropogenic regions |
+| DMS | `dms_rgn_scale` | `src_scyc/sulemis.F90` | 6 ocean basins |
+| Organic carbon | `oc_rgn_scale` | `src/caer.F90` | 9 regions (BB + FF + Boreal) |
+| Black carbon | `bc_rgn_scale` | `src/caer.F90` | 9 regions (same as OC) |
+
+Region boundaries are hardcoded in the application files and resolved
+per gridpoint; volcanic SO2 (separate emission stream in `volcemist`)
+is not affected by `so2_rgn_scale`. See [`RUN.md`](../RUN.md) for the
+namelist reference and region tables, and [`AOD_TUNE.md`](../AOD_TUNE.md)
+for the per-month tuning workflow against assimilated AOD climatologies.
+
 ### Data Assimilation (`src_assim/`)
 - `aod_assim_3d.F90` — Main assimilation driver
 - `analysis_3d.F90` — 3-D analysis update

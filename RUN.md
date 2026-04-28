@@ -68,6 +68,10 @@ Written by the run script into `<wrkdir>/namelist`.  Key variables:
 | `n_sslt_bands` | int | Number of active sea salt latitude bands (0 disables). See below. |
 | `sslt_bands(3,10)` | real array | Per-band sea salt tuning: `(lat_min, lat_max, scale)` triples. See below. |
 | `dst_rgn_scale(7)` | real array | Per-region dust emission multiplier (default 1.0 each). See below. |
+| `so2_rgn_scale(4)` | real array | Per-region SOx (SO2+SO4) emission multiplier (default 1.0). See below. |
+| `dms_rgn_scale(6)` | real array | Per-basin DMS emission multiplier (default 1.0). See below. |
+| `oc_rgn_scale(9)` | real array | Per-region organic carbon emission multiplier (default 1.0). See below. |
+| `bc_rgn_scale(9)` | real array | Per-region black carbon emission multiplier (default 1.0). See below. |
 
 #### Regional dust tuning (`dst_rgn_scale`)
 
@@ -119,6 +123,67 @@ n_sslt_bands = 3
 sslt_bands   = -90., -45., 1.15,
                -45.,  45., 1.00,
                 45.,  90., 0.95
+```
+
+#### Regional sulfate tuning (`so2_rgn_scale`, `dms_rgn_scale`)
+
+SOx-derived emissions (98% SO2 + 2% SO4, both 0m and >100m) are scaled
+together by `so2_rgn_scale(4)` — applied per gridpoint in
+`src_scyc/sulemis.F90` based on which named anthropogenic source region
+the point falls in. Volcanic SO2 is unaffected. Gridpoints outside all
+regions use scale 1.0.
+
+| Index | Region | Lat bounds | Lon bounds |
+|-------|--------|-----------|------------|
+| 1 | E. Asia | 20N–50N | 100E–145E |
+| 2 | S. Asia | 5N–35N | 65E–95E |
+| 3 | Europe | 35N–65N | 10W–50E |
+| 4 | N. America | 25N–60N | 125W–65W |
+
+DMS surface flux is scaled by `dms_rgn_scale(6)` — also applied in
+`sulemis.F90`, by ocean basin:
+
+| Index | Region | Lat bounds | Lon bounds |
+|-------|--------|-----------|------------|
+| 1 | N. Pacific | 0–60N | 120E–100W |
+| 2 | S. Pacific | 60S–0 | 145E–70W |
+| 3 | N. Atlantic | 0–60N | 100W–20E |
+| 4 | S. Atlantic | 60S–0 | 70W–20E |
+| 5 | Indian | 30S–30N | 30E–120E |
+| 6 | Southern | 90S–60S | all |
+
+Example:
+```fortran
+so2_rgn_scale = 0.85, 1.20, 0.90, 1.00
+dms_rgn_scale = 1.00, 1.10, 1.00, 1.00, 1.05, 1.20
+```
+
+#### Regional carbon tuning (`oc_rgn_scale`, `bc_rgn_scale`)
+
+Organic and black carbon are scaled independently by 9-element arrays,
+applied in `src/caer.F90` `caersf()` to the input components from
+`caerbnd` before they are composed into surface fluxes. OC scale
+multiplies BBOCSF + FFOCSF + NOCSF; BC scale multiplies BBBCSF + FFBCSF.
+
+Both arrays use the same 9 regions, tested in order; first match wins
+(anthropogenic FF boxes precede the Boreal NH catch-all):
+
+| Index | Region | Lat bounds | Lon bounds |
+|-------|--------|-----------|------------|
+| 1 | Amazon | 15S–10N | 80W–50W |
+| 2 | S. Africa | 35S–5N | 10E–45E |
+| 3 | SE Asia/Indonesia | 10S–20N | 95E–150E |
+| 4 | Australia | 40S–10S | 110E–155E |
+| 5 | E. Asia | 20N–50N | 100E–145E |
+| 6 | S. Asia | 5N–35N | 65E–95E |
+| 7 | Europe | 35N–65N | 10W–50E |
+| 8 | N. America | 25N–60N | 125W–65W |
+| 9 | Boreal NH | 50N–75N | all |
+
+Example:
+```fortran
+oc_rgn_scale = 1.20, 1.10, 1.30, 0.95, 0.85, 1.05, 0.90, 1.00, 1.40
+bc_rgn_scale = 1.20, 1.10, 1.30, 0.95, 0.80, 1.10, 0.85, 1.00, 1.40
 ```
 
 ### Quick checklist
@@ -205,6 +270,10 @@ input configuration differs.
      (e.g. a stronger multiplier over the Southern Ocean where winds and
      sea-salt AOD are highest).  See the regional sea salt tuning section
      above.
+   - Optionally set `so2_rgn_scale` (4-element) and `dms_rgn_scale`
+     (6-element) for per-region sulfate tuning, and/or `oc_rgn_scale` /
+     `bc_rgn_scale` (9-element each) for per-region carbon tuning.
+     See the regional sulfate and carbon tuning sections above.
    - Coefficients should be tuned per month against assimilated AOD
      climatologies.  See `AOD_TUNE.md` for the plan.
 

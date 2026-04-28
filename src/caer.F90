@@ -58,7 +58,7 @@ contains
 
 !#######################################################################
 
-   subroutine caersf( nemis, lat, sflx )
+   subroutine caersf( nemis, lat, rlat, oc_rgn_scale, bc_rgn_scale, sflx )
 
       ! Set carbon aerosol surface fluxes.
 
@@ -70,6 +70,11 @@ contains
          nemis,             &! number of carbon aerosol species with emissions
          lat                 ! model latitude index
 
+      real(r8), intent(in) ::&
+         rlat,              &! [rdn] latitude of this row
+         oc_rgn_scale(9),   &! per-region OC multiplier
+         bc_rgn_scale(9)     ! per-region BC multiplier
+
       real(r8), intent(out) ::&
          sflx(plond,nemis)   ! surface flux in kg/m^2/s
 
@@ -77,10 +82,62 @@ contains
       integer i, m
       real(r8) ::&
          tmp(plond,5)
+      real(r8) :: lat_deg, lon_deg, oc_scl, bc_scl
+      integer :: rgn
       !------------------------------------------------------------------------------
 
       ! Get latitude slice of carbon aerosol emissions data.
+      ! tmp(:,1) BBOCSF  tmp(:,2) BBBCSF  tmp(:,3) FFOCSF
+      ! tmp(:,4) FFBCSF  tmp(:,5) NOCSF
       call caerbndget( lat, plond, tmp )
+
+      ! Apply per-region OC and BC tuning to the input components.
+      ! Regions tested in order; first match wins (FF boxes precede the
+      ! Boreal NH catch-all so they take priority in overlap zones).
+      lat_deg = rlat * 57.29577951308232_r8
+      do i = 1, plon
+         lon_deg = (i-1) * 360.0_r8 / plon
+         rgn = 0
+         if      ( lat_deg >= -15.0 .and. lat_deg <= 10.0 .and. &
+                   lon_deg >= 280.0 .and. lon_deg <= 310.0 ) then
+            rgn = 1                            ! Amazon
+         else if ( lat_deg >= -35.0 .and. lat_deg <=  5.0 .and. &
+                   lon_deg >=  10.0 .and. lon_deg <= 45.0 ) then
+            rgn = 2                            ! S. Africa
+         else if ( lat_deg >= -10.0 .and. lat_deg <= 20.0 .and. &
+                   lon_deg >=  95.0 .and. lon_deg <= 150.0 ) then
+            rgn = 3                            ! SE Asia/Indonesia
+         else if ( lat_deg >= -40.0 .and. lat_deg <= -10.0 .and. &
+                   lon_deg >= 110.0 .and. lon_deg <= 155.0 ) then
+            rgn = 4                            ! Australia
+         else if ( lat_deg >=  20.0 .and. lat_deg <= 50.0 .and. &
+                   lon_deg >= 100.0 .and. lon_deg <= 145.0 ) then
+            rgn = 5                            ! E. Asia
+         else if ( lat_deg >=   5.0 .and. lat_deg <= 35.0 .and. &
+                   lon_deg >=  65.0 .and. lon_deg <=  95.0 ) then
+            rgn = 6                            ! S. Asia
+         else if ( lat_deg >=  35.0 .and. lat_deg <= 65.0 .and. &
+                   ( lon_deg >= 350.0 .or. lon_deg <= 50.0 ) ) then
+            rgn = 7                            ! Europe
+         else if ( lat_deg >=  25.0 .and. lat_deg <= 60.0 .and. &
+                   lon_deg >= 235.0 .and. lon_deg <= 295.0 ) then
+            rgn = 8                            ! N. America
+         else if ( lat_deg >=  50.0 .and. lat_deg <= 75.0 ) then
+            rgn = 9                            ! Boreal NH (catch-all)
+         end if
+
+         oc_scl = 1.0_r8
+         bc_scl = 1.0_r8
+         if ( rgn > 0 ) then
+            oc_scl = oc_rgn_scale(rgn)
+            bc_scl = bc_rgn_scale(rgn)
+         end if
+         tmp(i,1) = oc_scl * tmp(i,1)          ! BBOCSF
+         tmp(i,3) = oc_scl * tmp(i,3)          ! FFOCSF
+         tmp(i,5) = oc_scl * tmp(i,5)          ! NOCSF
+         tmp(i,2) = bc_scl * tmp(i,2)          ! BBBCSF
+         tmp(i,4) = bc_scl * tmp(i,4)          ! FFBCSF
+      end do
 
       if ( nemis .eq. 1 ) then
          do i = 1, plon

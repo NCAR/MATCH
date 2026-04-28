@@ -71,6 +71,8 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
 #include <tracnam.h>
 c-----------------------------------------------------------------------
+#include <control.com>
+c-----------------------------------------------------------------------
 
 c Input arguments:
       integer
@@ -96,6 +98,8 @@ c Output argument:
 
 c Local variables:
       integer i, k, m
+      real(r8) rlat                ! [rdn] latitude of this row
+      real(r8) clat                ! external function (grid.F)
 #ifdef SCYC
 c++scyc
       real(r8) so2tend(plond,plev)
@@ -111,6 +115,8 @@ c-----------------------------------------------------------------------
 
       call setr( pcnst*plond, zero, sflx )
 
+      rlat = clat(lat)
+
 c     Interface for surface fluxes from netCDF annual cycle data.
 c     (do nothing if no annual cycle surface fluxes have been specified)
       call getsf( lat, sflx )
@@ -120,8 +126,8 @@ c++scyc
       if ( doscyc() ) then
          m = scyc_idx1()
 c        Emissions are added to tracer array inside addsulemis.
-         call addsulemis( lat, dtime, gravit, rpdel, zi, as(1,1,m)
-     $,                   obuf )
+         call addsulemis( lat, rlat, so2_rgn_scale, dms_rgn_scale
+     $,                   dtime, gravit, rpdel, zi, as(1,1,m), obuf )
 c        Volcano emissions.
          if ( add_volc_emis() ) then
             m = scyc_idx1()
@@ -142,7 +148,8 @@ c++caer
 c        Carbon aerosol surface flux(es).
          mm = caer_idx1()
          nphob = caer_ncomp()/2
-         call caersf( nphob, lat, sflx(1,mm) )
+         call caersf( nphob, lat, rlat, oc_rgn_scale, bc_rgn_scale
+     $,               sflx(1,mm) )
          do m = 1, nphob
             mm = caer_idx1() + m - 1
             call outfld( sflxnam(mm), sflx(1,mm), plond, lat, obuf )

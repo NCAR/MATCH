@@ -3,7 +3,7 @@
 ## Goal
 
 Tune MATCH CORe aerosol emission parameters per calendar month against
-AOD climatologies from MATCH assimilation runs, targeting two species:
+AOD climatologies from MATCH assimilation runs, targeting four species:
 
 - **Dust** — per-region emission multiplier (`dst_rgn_scale`, 7 regions).
   An older global rescale of soil moisture (`vwc_scale`, `vwc_offset`)
@@ -14,6 +14,12 @@ AOD climatologies from MATCH assimilation runs, targeting two species:
   optional per-latitude-band tuning (`sslt_bands`, `n_sslt_bands`) to
   address N/S asymmetry in wind-driven emission (strong Southern Ocean
   bias is the largest signal against MODIS/VIIRS).
+- **Sulfate** — per-region SOx emission multiplier (`so2_rgn_scale`,
+  4 anthropogenic source regions) and per-basin DMS multiplier
+  (`dms_rgn_scale`, 6 ocean basins). Volcanic SO2 is unaffected.
+- **Carbon** — per-region OC and BC emission multipliers
+  (`oc_rgn_scale`, `bc_rgn_scale`, 9 regions each — same boxes for both,
+  spanning major BB and FF source areas plus a Boreal NH catch-all).
 
 ## Problem
 
@@ -101,7 +107,51 @@ for backwards compatibility but is superseded: a single linear rescale
 cannot simultaneously suppress hyperarid Sahara/Arabia emission and
 preserve moderate Gobi/Australia emission.
 
-### Step 4: Validate
+### Step 4: Tune sulfate and carbon per region
+
+With dust and sea salt fixed, tune sulfate (SOx) and carbon (OC, BC)
+against per-species climatologies (or AAOD for BC).  Each species has
+its own predefined regional boxes; outside every box, the multiplier
+is 1.0.  All scales default to 1.0 (identity).
+
+**Sulfate — `so2_rgn_scale(4)`** (anthropogenic SOx; both 0m and >100m
+emissions are scaled together; volcanic SO2 is unaffected):
+
+| Index | Region | Lat | Lon |
+|-------|--------|-----|-----|
+| 1 | E. Asia    | 20-50N | 100-145E |
+| 2 | S. Asia    |  5-35N |  65-95E  |
+| 3 | Europe     | 35-65N |  10W-50E |
+| 4 | N. America | 25-60N | 125W-65W |
+
+**DMS — `dms_rgn_scale(6)`** (ocean basins):
+
+| Index | Region | Lat | Lon |
+|-------|--------|-----|-----|
+| 1 | N. Pacific  |   0-60N | 120E-100W |
+| 2 | S. Pacific  | 60S- 0  | 145E- 70W |
+| 3 | N. Atlantic |   0-60N | 100W- 20E |
+| 4 | S. Atlantic | 60S- 0  |  70W- 20E |
+| 5 | Indian      | 30S-30N |  30E-120E |
+| 6 | Southern    | 90S-60S | all       |
+
+**Carbon — `oc_rgn_scale(9)` and `bc_rgn_scale(9)`** (same boxes,
+tested in order; first match wins so anthropogenic FF regions
+take precedence over the Boreal NH catch-all):
+
+| Index | Region | Lat | Lon |
+|-------|--------|-----|-----|
+| 1 | Amazon          | 15S-10N |  80W- 50W |
+| 2 | S. Africa       | 35S- 5N |  10E- 45E |
+| 3 | SE Asia/Indo    | 10S-20N |  95E-150E |
+| 4 | Australia       | 40S-10S | 110E-155E |
+| 5 | E. Asia         | 20N-50N | 100E-145E |
+| 6 | S. Asia         |  5N-35N |  65E- 95E |
+| 7 | Europe          | 35N-65N |  10W- 50E |
+| 8 | N. America      | 25N-60N | 125W- 65W |
+| 9 | Boreal NH       | 50N-75N | all       |
+
+### Step 5: Validate
 
 Compare tuned MATCH output against:
 - Held-out satellite data (train on MODIS, validate on VIIRS)
@@ -120,6 +170,14 @@ sslt_bands    = -90., -45., 1.15,  ! Southern Ocean
                  45.,  90., 0.95   ! Northern Ocean
 dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
                        ! Sahara, Arabia, C.Asia, Gobi, Australia, SW-NAm, Patagonia
+so2_rgn_scale = 1.0, 1.0, 1.0, 1.0
+                       ! E.Asia, S.Asia, Europe, N.America
+dms_rgn_scale = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+                       ! N.Pac, S.Pac, N.Atl, S.Atl, Indian, Southern
+oc_rgn_scale  = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+bc_rgn_scale  = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+                       ! Amazon, S.Africa, SE.Asia, Aust, E.Asia, S.Asia,
+                       ! Europe, N.America, Boreal NH
 ! Legacy (superseded by dst_rgn_scale):
 ! vwc_scale  = 1.0     ! dust soil moisture rescaling slope
 ! vwc_offset = 0.0     ! dust soil moisture rescaling offset
@@ -134,13 +192,24 @@ dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
   concentration and unit conversion; band lookup uses the row latitude
   in radians passed down from `src/physlic.F`.  Validation runs at
   startup in `src/main.F` (latitude range, lat_min<lat_max, no overlap).
+- `so2_rgn_scale` and `dms_rgn_scale` — applied in
+  `src_scyc/sulemis.F90`.  SOx scaling multiplies all four
+  SOx-derived `sflx` slots (98% SO2 + 2% SO4, both 0m and >100m).
+  DMS scaling multiplies the DMS slot.  The latitude in radians is
+  passed in from `src/surface.F` and longitude is recovered per
+  gridpoint as `(i-1)*360/plon`.
+- `oc_rgn_scale` and `bc_rgn_scale` — applied in `src/caer.F90`
+  inside `caersf()` to the input components from `caerbnd`.
+  OC scale multiplies BBOCSF, FFOCSF, NOCSF; BC scale multiplies
+  BBBCSF, FFBCSF.  Latitude/longitude are resolved as for sulfate.
 
 ## Output
 
-Two tables per calendar month: dust regional coefficients and sea salt
-coefficients.  Sea salt has a single global multiplier (`sslt_scale`) and
-an optional set of latitude bands (`sslt_bands`); use "—" in the bands
-column when no bands are active.
+Per-species per-calendar-month coefficient tables follow.  Sea salt has
+a single global multiplier (`sslt_scale`) and an optional set of latitude
+bands (`sslt_bands`); use "—" in the bands column when no bands are active.
+The other species use per-region arrays; "TBD" entries are unset (treat
+as 1.0 at run time).
 
 ### Dust (`dst_rgn_scale`, 7 regions)
 
@@ -178,6 +247,74 @@ column when no bands are active.
 | Oct   | TBD  | TBD | |
 | Nov   | TBD  | TBD | |
 | Dec   | TBD  | TBD | |
+
+### Sulfate (`so2_rgn_scale`, 4 regions)
+
+| Month | E.Asia | S.Asia | Europe | N.Am | Notes |
+|-------|--------|--------|--------|------|-------|
+| Jan   | TBD | TBD | TBD | TBD | |
+| Feb   | TBD | TBD | TBD | TBD | |
+| Mar   | TBD | TBD | TBD | TBD | |
+| Apr   | TBD | TBD | TBD | TBD | |
+| May   | TBD | TBD | TBD | TBD | |
+| Jun   | TBD | TBD | TBD | TBD | |
+| Jul   | TBD | TBD | TBD | TBD | |
+| Aug   | TBD | TBD | TBD | TBD | |
+| Sep   | TBD | TBD | TBD | TBD | |
+| Oct   | TBD | TBD | TBD | TBD | |
+| Nov   | TBD | TBD | TBD | TBD | |
+| Dec   | TBD | TBD | TBD | TBD | |
+
+### DMS (`dms_rgn_scale`, 6 ocean basins)
+
+| Month | N.Pac | S.Pac | N.Atl | S.Atl | Indian | Southern | Notes |
+|-------|-------|-------|-------|-------|--------|----------|-------|
+| Jan   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Feb   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Mar   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Apr   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| May   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jun   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jul   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Aug   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Sep   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Oct   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Nov   | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Dec   | TBD | TBD | TBD | TBD | TBD | TBD | |
+
+### Organic carbon (`oc_rgn_scale`, 9 regions)
+
+| Month | Amaz | S.Afr | SE.Asia | Aust | E.Asia | S.Asia | Europe | N.Am | Boreal | Notes |
+|-------|------|-------|---------|------|--------|--------|--------|------|--------|-------|
+| Jan   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Feb   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Mar   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Apr   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| May   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jun   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jul   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Aug   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Sep   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Oct   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Nov   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Dec   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+
+### Black carbon (`bc_rgn_scale`, 9 regions)
+
+| Month | Amaz | S.Afr | SE.Asia | Aust | E.Asia | S.Asia | Europe | N.Am | Boreal | Notes |
+|-------|------|-------|---------|------|--------|--------|--------|------|--------|-------|
+| Jan   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Feb   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Mar   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Apr   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| May   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jun   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Jul   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Aug   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Sep   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Oct   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Nov   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
+| Dec   | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | |
 
 ## Evaluation — March 2026 (tune5 vs VIIRS Mar 2025)
 

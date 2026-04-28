@@ -122,12 +122,50 @@ c                   ! be strictly less than lat_max, and bands must not
 c                   ! overlap (touching at the boundary is allowed).
 c                   ! Default 0.0 for all entries (inactive until
 c                   ! n_sslt_bands > 0 and entries populated).
+     $, so2_rgn_scale(4)  ! [frc] Per-region SOx (SO2+SO4) emission multiplier.
+c                   ! Applied in src_scyc/sulemis.F90 to all SOx-derived sflx
+c                   ! components (98% SO2 + 2% SO4, both 0m and >100m).
+c                   ! Volcanic SO2 is unaffected. Regions:
+c                   !   1 = E. Asia       (20-50N, 100-145E)
+c                   !   2 = S. Asia       ( 5-35N,  65-95E)
+c                   !   3 = Europe        (35-65N,  10W-50E)
+c                   !   4 = N. America    (25-60N, 125W-65W)
+c                   ! Default 1.0 (no per-region change).
+     $, dms_rgn_scale(6)  ! [frc] Per-region DMS emission multiplier.
+c                   ! Applied in src_scyc/sulemis.F90 to the DMS sflx slot.
+c                   ! Regions (ocean basins):
+c                   !   1 = N. Pacific    (  0-60N, 120E-100W)
+c                   !   2 = S. Pacific    (60S- 0 , 145E- 70W)
+c                   !   3 = N. Atlantic   (  0-60N, 100W- 20E)
+c                   !   4 = S. Atlantic   (60S- 0 ,  70W- 20E)
+c                   !   5 = Indian        (30S-30N,  30E-120E)
+c                   !   6 = Southern      (90S-60S, all)
+c                   ! Default 1.0 (no per-region change).
+     $, oc_rgn_scale(9)   ! [frc] Per-region organic carbon emission multiplier.
+c                   ! Applied in src/caer.F90 to the OC components
+c                   ! (BBOCSF + FFOCSF + NOCSF) before composing sflx.
+c                   ! Regions (tested in order; first match wins):
+c                   !   1 = Amazon        (15S-10N,  80W- 50W)
+c                   !   2 = S. Africa     (35S- 5N,  10E- 45E)
+c                   !   3 = SE Asia/Indo  (10S-20N,  95E-150E)
+c                   !   4 = Australia     (40S-10S, 110E-155E)
+c                   !   5 = E. Asia       (20N-50N, 100E-145E)
+c                   !   6 = S. Asia       ( 5N-35N,  65E- 95E)
+c                   !   7 = Europe        (35N-65N,  10W- 50E)
+c                   !   8 = N. America    (25N-60N, 125W- 65W)
+c                   !   9 = Boreal NH     (50N-75N, all)
+c                   ! Default 1.0 (no per-region change).
+     $, bc_rgn_scale(9)   ! [frc] Per-region black carbon emission multiplier.
+c                   ! Applied in src/caer.F90 to the BC components
+c                   ! (BBBCSF + FFBCSF) before composing sflx. Regions match
+c                   ! oc_rgn_scale (see above). Default 1.0.
       integer
      $  n_sslt_bands ! Number of active entries in sslt_bands, 0..max_sslt_bands.
 c                    ! Default 0 disables regional scaling.
 
       common /control2/ qrelax, vwc_scale, vwc_offset, sslt_scale
      $, dst_rgn_scale, sslt_bands
+     $, so2_rgn_scale, dms_rgn_scale, oc_rgn_scale, bc_rgn_scale
       common /control3/ n_sslt_bands
 
 

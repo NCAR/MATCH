@@ -11,4 +11,5 @@ observations.
 
 - [Architecture](docs/architecture.md) — Code organization, modules, and data flow
 - [Building](docs/build.md) — Compiler setup, Makefile configuration, compilation
-- [Running](docs/run.md) — Data setup, run scripts, execution
+- [Running](RUN.md) — Run directory setup, namelist reference, emission tuning, CDAS↔CORe migration
+- [AOD tuning plan](AOD_TUNE.md) — Per-month tuning of dust, sea salt, sulfate, and carbon emission scales
