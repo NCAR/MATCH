@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# MATCH run script for March 2026 — CORe meteorology, tuning trial 4
+# MATCH run script for March 2026 — CORe meteorology, tuning trial 7
 # 10-day Feb spin-up (Feb 19-28) + full March (31 days) = 41 days
 # Regional dust tuning via dst_rgn_scale (7 regions); vwc rescale identity.
 #
@@ -19,8 +19,8 @@ count_max=41
 
 debug=0
 
-export CASE=sarb4_hourly_202603_core_tune5
-vers='MATCH SARB4 C6 CORe tune5'
+export CASE=sarb4_hourly_202603_core_tune7
+vers='MATCH SARB4 C6 CORe tune7'
 binary="$HOME/EarthSystem/MATCH/build/match"
 
 export DATA_DIR="$HOME/Data"
@@ -100,8 +100,8 @@ cat > namelist << END1
  soxsfyr  = 1995
  vwc_scale     = 1.0
  vwc_offset    = 0.0
- sslt_scale    = 1.08
- dst_rgn_scale = 0.14, 0.21, 1.75, 3.75, 1.4, 1.0, 0.45
+ sslt_scale    = 0.8587
+ dst_rgn_scale = 0.3682, 0.4858, 1.0, 1.0, 1.4, 1.0, 0.45
  TRACNAM  = 'SO2', 'SO4', 'DMS', 'H2O2',
             'DSTQ01', 'DSTQ02', 'DSTQ03', 'DSTQ04',
             'OCPHO', 'BCPHO', 'OCPHI', 'BCPHI'
